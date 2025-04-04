@@ -77,6 +77,26 @@
   }
 }
 
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background-color: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--primary));
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
 .get-tag {
   @apply bg-emerald-600 text-white;
 }
@@ -110,7 +130,7 @@
 }
 
 .param-field {
-  @apply block w-full rounded-md bg-background border-input border p-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary;
+  @apply block w-full rounded-md border-input border p-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary;
 }
 
 .tab-active {
@@ -131,6 +151,10 @@
 
 .success-badge {
   @apply bg-emerald-600/20 text-emerald-500 rounded-full px-3 py-1 text-xs font-medium inline-flex items-center;
+}
+
+.error-badge {
+  @apply bg-red-600/20 text-red-500 rounded-full px-3 py-1 text-xs font-medium inline-flex items-center;
 }
 
 .required-badge {

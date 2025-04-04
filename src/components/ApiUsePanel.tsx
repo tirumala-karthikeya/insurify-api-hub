@@ -117,7 +117,8 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
             "hr_manager_id": "E009",
             "marital_status": "single",
             "state": "California",
-            "emergency_contact_name": "Gina Moore"
+            "emergency_contact_name": "Gina Moore",
+            "emergency_contact_phone": "001-851-316-1559x40781"
           }
         ],
         "total": 87,
@@ -145,7 +146,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
       setResponseStatus({
         code: statusCode,
         text: statusCode === 200 ? "OK" : "Bad Request",
-        time: `${Math.floor(Math.random() * 1000) + 100} ms`,
+        time: `${Math.floor(Math.random() * 3000) + 100} ms`,
         size: `${Math.floor(Math.random() * 100) + 10}.${Math.floor(Math.random() * 90) + 10} KB`
       });
       setIsLoading(false);
@@ -159,14 +160,14 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
   };
   
   return (
-    <div className="border-l h-screen overflow-auto w-96 flex flex-col">
-      <div className="border-b p-4 flex items-center justify-between">
+    <div className="border-l h-screen overflow-auto w-96 flex flex-col bg-background">
+      <div className="border-b p-4 flex items-center justify-between bg-background">
         <div>
           <h3 className="font-medium text-lg">{method} {endpoint}</h3>
           <p className="text-xs text-muted-foreground">API</p>
         </div>
         <div className="flex items-center space-x-2">
-          <select className="bg-secondary text-sm rounded-md p-1 border">
+          <select className="bg-background text-sm rounded-md p-1 border">
             <option>Development</option>
             <option>Production</option>
           </select>
@@ -176,7 +177,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
         </div>
       </div>
       
-      <div className="p-4 border-b">
+      <div className="p-4 border-b bg-background">
         <div className="flex items-center space-x-2">
           <span className={`method-tab ${method.toLowerCase()}-tag`}>{method}</span>
           <input
@@ -205,7 +206,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
         </div>
       </div>
       
-      <div className="border-b">
+      <div className="border-b bg-background">
         <div className="flex border-b">
           <button 
             className={`tab-button ${activeTab === 'params' ? 'active' : ''}`}
@@ -243,7 +244,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
                   <span className="text-sm font-medium">API Base URL:</span>
                   <button className="text-xs text-primary">Edit</button>
                 </label>
-                <div className="text-xs text-muted-foreground mt-1">
+                <div className="text-xs text-blue-400 mt-1">
                   {baseUrl}
                 </div>
               </div>
@@ -259,40 +260,68 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
                   <input
                     type="text"
                     placeholder="Enter api_key (spectrum_api_key_123@ai)"
-                    className="param-field"
+                    className="param-field bg-background"
                   />
                   <p className="text-xs text-muted-foreground mt-1">string - Required query parameter</p>
                 </div>
                 
-                <div>
-                  <label className="text-sm text-blue-400 block mb-1">status</label>
-                  <input
-                    type="text"
-                    placeholder="Enter status (active)"
-                    className="param-field"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">string - Optional query parameter</p>
-                </div>
+                {method === "POST" && (
+                  <>
+                    <div>
+                      <label className="text-sm text-blue-400 block mb-1">source</label>
+                      <input
+                        type="text"
+                        placeholder="Enter source (system)"
+                        className="param-field bg-background"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">string - Optional query parameter</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm text-blue-400 block mb-1">sync</label>
+                      <input
+                        type="text"
+                        placeholder="Enter sync (true)"
+                        className="param-field bg-background"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">boolean - Optional query parameter</p>
+                    </div>
+                  </>
+                )}
                 
-                <div>
-                  <label className="text-sm text-blue-400 block mb-1">page</label>
-                  <input
-                    type="text"
-                    placeholder="Enter page (1)"
-                    className="param-field"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">integer - Optional query parameter</p>
-                </div>
-                
-                <div>
-                  <label className="text-sm text-blue-400 block mb-1">limit</label>
-                  <input
-                    type="text"
-                    placeholder="Enter limit (10)"
-                    className="param-field"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">integer - Optional query parameter</p>
-                </div>
+                {method !== "POST" && (
+                  <>
+                    <div>
+                      <label className="text-sm text-blue-400 block mb-1">status</label>
+                      <input
+                        type="text"
+                        placeholder="Enter status (active)"
+                        className="param-field bg-background"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">string - Optional query parameter</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm text-blue-400 block mb-1">page</label>
+                      <input
+                        type="text"
+                        placeholder="Enter page (1)"
+                        className="param-field bg-background"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">integer - Optional query parameter</p>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm text-blue-400 block mb-1">limit</label>
+                      <input
+                        type="text"
+                        placeholder="Enter limit (10)"
+                        className="param-field bg-background"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">integer - Optional query parameter</p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -307,13 +336,13 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
                   <input
                     type="text"
                     value="Content-Type"
-                    className="param-field flex-1"
+                    className="param-field flex-1 bg-background"
                     readOnly
                   />
                   <input
                     type="text"
                     value="application/json"
-                    className="param-field flex-1"
+                    className="param-field flex-1 bg-background"
                     readOnly
                   />
                   <button className="px-3 py-2 bg-red-500/20 text-red-400 rounded-md">
@@ -325,13 +354,13 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
                   <input
                     type="text"
                     value="Authorization"
-                    className="param-field flex-1"
+                    className="param-field flex-1 bg-background"
                     readOnly
                   />
                   <input
                     type="text"
                     value="Bearer token123"
-                    className="param-field flex-1"
+                    className="param-field flex-1 bg-background"
                   />
                   <button className="px-3 py-2 bg-red-500/20 text-red-400 rounded-md">
                     Remove
@@ -363,19 +392,22 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
               </div>
               
               <div className="border rounded-md">
-                <pre className="p-4 text-sm font-mono overflow-auto" style={{ maxHeight: "400px" }}>
+                <pre className="p-4 text-sm font-mono overflow-auto bg-background" style={{ maxHeight: "400px" }}>
 {`{
-  "policy_id": "",
+  "employee_id": "",
   "first_name": "",
   "last_name": "",
   "email": "",
   "phone_number": "",
-  "start_date": "",
-  "end_date": "",
-  "policy_type": "",
-  "premium_amount": 0,
-  "coverage_amount": 0,
-  "status": ""
+  "hire_date": "",
+  "job_title": "",
+  "job_id": 0,
+  "gov_id": "",
+  "hiring_manager_id": "",
+  "hr_manager_id": "",
+  "marital_status": "",
+  "state": "",
+  "emergency_contact_name": ""
 }`}
                 </pre>
               </div>
@@ -391,7 +423,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
                 <input
                   type="text"
                   placeholder="Enter your API key (required for all requests)"
-                  className="param-field"
+                  className="param-field bg-background"
                 />
               </div>
               
@@ -403,7 +435,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
                 <h5 className="text-primary mb-2">Current Environment: Development</h5>
                 <div className="mb-2">
                   <label className="text-sm block mb-1">Base URL:</label>
-                  <div className="text-sm font-mono">https://dev-api.insurancedb.com/v1</div>
+                  <div className="text-sm font-mono text-blue-400">{baseUrl}</div>
                 </div>
                 <button className="px-4 py-2 bg-primary/20 text-primary rounded-md text-sm">
                   Change Environment
@@ -415,7 +447,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
       </div>
       
       {responseStatus && (
-        <div className="p-4 flex-1 overflow-auto">
+        <div className="p-4 flex-1 overflow-auto bg-background">
           <div className="flex justify-between items-center mb-2 cursor-pointer" 
                onClick={() => setIsResponseCollapsed(!isResponseCollapsed)}>
             <h4 className="text-lg font-medium">Response</h4>
@@ -447,7 +479,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
               </div>
               
               <div className="border rounded-md max-h-80 overflow-auto">
-                <pre className="p-4 text-sm font-mono">
+                <pre className="p-4 text-sm font-mono bg-background">
                   {JSON.stringify(response, null, 2)}
                 </pre>
               </div>

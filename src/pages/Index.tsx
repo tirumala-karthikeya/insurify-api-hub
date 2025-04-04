@@ -12,7 +12,7 @@ const Index = () => {
   const currentEndpoint = apiEndpoints[activeEndpoint];
 
   const handleUseApi = () => {
-    setShowApiUsePanel(true);
+    setShowApiUsePanel(prev => !prev);
   };
 
   return (
