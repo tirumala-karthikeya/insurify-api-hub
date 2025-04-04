@@ -1,9 +1,17 @@
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Copy } from "lucide-react";
+import { ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
+
+interface Parameter {
+  name: string;
+  type: string;
+  required: boolean;
+  description: string;
+  value?: string;
+}
 
 interface ApiDocumentationProps {
   endpoint: string;
@@ -11,9 +19,9 @@ interface ApiDocumentationProps {
   title: string;
   baseUrl: string;
   path: string;
-  queryParams?: { name: string; type: string; required: boolean; description: string }[];
-  headerParams?: { name: string; type: string; required: boolean; description: string }[];
-  bodyParams?: { name: string; type: string; required: boolean; description: string }[];
+  queryParams?: Parameter[];
+  headerParams?: Parameter[];
+  bodyParams?: Parameter[];
   responseExample?: Record<string, any>;
   onUseApi: () => void;
   isApiPanelOpen?: boolean;
@@ -52,6 +60,11 @@ export default function ApiDocumentation({
   "state": "",
   "emergency_contact_name": ""
 }`);
+  const [activeLanguage, setActiveLanguage] = useState("curl");
+  const [isCopied, setIsCopied] = useState(false);
+  const [queryParamsValues, setQueryParamsValues] = useState<Record<string, string>>({});
+  const [headerParamsValues, setHeaderParamsValues] = useState<Record<string, string>>({});
+  const [bodyParamsValues, setBodyParamsValues] = useState<Record<string, string>>({});
 
   const responseData = {
     "employees": [
@@ -77,10 +90,276 @@ export default function ApiDocumentation({
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const handleSendRequest = () => {
     setShowResponse(true);
+  };
+
+  const handleQueryParamChange = (name: string, value: string) => {
+    setQueryParamsValues(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleHeaderParamChange = (name: string, value: string) => {
+    setHeaderParamsValues(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleBodyParamChange = (name: string, value: string) => {
+    setBodyParamsValues(prev => ({ ...prev, [name]: value }));
+  };
+
+  const getSampleCode = (language: string) => {
+    const apiUrl = `${baseUrl}${path}`;
+    const apiKey = queryParamsValues.api_key || "xpectrum_api_key_123@ai";
+
+    switch (language) {
+      case "curl":
+        return `curl --location --request ${method} '${apiUrl}' \\
+--header 'X-API-KEY: ${apiKey}' \\
+--header 'Content-Type: application/json'${method === "POST" || method === "PUT" ? ` \\
+--data-raw '${requestBody}'` : ""}`;
+
+      case "js":
+        return `const options = {
+  method: "${method}",
+  headers: {
+    "X-API-KEY": "${apiKey}",
+    "Content-Type": "application/json"
+  }${method === "POST" || method === "PUT" ? `,
+  body: JSON.stringify(${requestBody})` : ""}
+};
+
+fetch("${apiUrl}", options)
+  .then(response => response.json())
+  .then(data => console.log(data))
+  .catch(error => console.error('Error:', error));`;
+
+      case "python":
+        return `import requests
+
+url = "${apiUrl}"
+headers = {
+  "X-API-KEY": "${apiKey}",
+  "Content-Type": "application/json"
+}
+${method === "POST" || method === "PUT" ? `payload = ${requestBody}
+
+response = requests.${method.toLowerCase()}(url, json=payload, headers=headers)` : `response = requests.${method.toLowerCase()}(url, headers=headers)`}
+print(response.json())`;
+
+      case "java":
+        return `import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+public class ApiRequest {
+  public static void main(String[] args) {
+    HttpClient client = HttpClient.newHttpClient();
+    
+    HttpRequest request = HttpRequest.newBuilder()
+      .uri(URI.create("${apiUrl}"))
+      .header("X-API-KEY", "${apiKey}")
+      .header("Content-Type", "application/json")${method === "POST" || method === "PUT" ? `
+      .${method.toLowerCase()}(HttpRequest.BodyPublishers.ofString('${requestBody}'))` : `
+      .method("${method}", HttpRequest.BodyPublishers.noBody())`}
+      .build();
+    
+    client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+      .thenApply(HttpResponse::body)
+      .thenAccept(System.out::println)
+      .join();
+  }
+}`;
+
+      case "swift":
+        return `import Foundation
+
+let url = URL(string: "${apiUrl}")!
+var request = URLRequest(url: url)
+request.httpMethod = "${method}"
+request.addValue("${apiKey}", forHTTPHeaderField: "X-API-KEY")
+request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+${method === "POST" || method === "PUT" ? `
+let json = """
+${requestBody}
+"""
+request.httpBody = json.data(using: .utf8)
+` : ""}
+let task = URLSession.shared.dataTask(with: request) { data, response, error in
+  if let data = data {
+    let responseJSON = try? JSONSerialization.jsonObject(with: data)
+    print(responseJSON ?? "No data")
+  }
+}
+task.resume()`;
+
+      case "go":
+        return `package main
+
+import (
+  "fmt"
+  "net/http"
+  "io/ioutil"${method === "POST" || method === "PUT" ? `
+  "strings"` : ""}
+)
+
+func main() {
+  ${method === "POST" || method === "PUT" ? `jsonStr := \`${requestBody}\`
+  payload := strings.NewReader(jsonStr)
+  req, _ := http.NewRequest("${method}", "${apiUrl}", payload)` : `req, _ := http.NewRequest("${method}", "${apiUrl}", nil)`}
+  
+  req.Header.Add("X-API-KEY", "${apiKey}")
+  req.Header.Add("Content-Type", "application/json")
+  
+  res, _ := http.DefaultClient.Do(req)
+  defer res.Body.Close()
+  body, _ := ioutil.ReadAll(res.Body)
+  
+  fmt.Println(string(body))
+}`;
+
+      case "php":
+        return `<?php
+$curl = curl_init();
+
+curl_setopt_array($curl, [
+  CURLOPT_URL => "${apiUrl}",
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_CUSTOMREQUEST => "${method}",
+  CURLOPT_HTTPHEADER => [
+    "X-API-KEY: ${apiKey}",
+    "Content-Type: application/json"
+  ]${method === "POST" || method === "PUT" ? `,
+  CURLOPT_POSTFIELDS => '${requestBody}'` : ""}
+]);
+
+$response = curl_exec($curl);
+curl_close($curl);
+
+echo $response;
+?>`;
+
+      case "c#":
+        return `using System;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+
+class Program
+{
+  static async Task Main()
+  {
+    using (var client = new HttpClient())
+    {
+      client.DefaultRequestHeaders.Add("X-API-KEY", "${apiKey}");
+      
+      ${method === "POST" || method === "PUT" ? `var content = new StringContent(
+        @"${requestBody}",
+        Encoding.UTF8,
+        "application/json"
+      );
+      
+      var response = await client.${method === "POST" ? "PostAsync" : "PutAsync"}("${apiUrl}", content);` : `var request = new HttpRequestMessage(
+        new HttpMethod("${method}"),
+        "${apiUrl}"
+      );
+      
+      var response = await client.SendAsync(request);`}
+      
+      var responseContent = await response.Content.ReadAsStringAsync();
+      Console.WriteLine(responseContent);
+    }
+  }
+}`;
+
+      case "objc":
+        return `#import <Foundation/Foundation.h>
+
+NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"${apiUrl}"]];
+[request setHTTPMethod:@"${method}"];
+
+[request setValue:@"${apiKey}" forHTTPHeaderField:@"X-API-KEY"];
+[request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+${method === "POST" || method === "PUT" ? `
+NSString *jsonBody = @"${requestBody.replace(/"/g, '\\"')}";
+[request setHTTPBody:[jsonBody dataUsingEncoding:NSUTF8StringEncoding]];
+` : ""}
+NSURLSession *session = [NSURLSession sharedSession];
+NSURLSessionDataTask *task = [session dataTaskWithRequest:request
+                                        completionHandler:
+                                      ^(NSData *data, NSURLResponse *response, NSError *error) {
+  if (data) {
+    NSError *parseError = nil;
+    id responseObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&parseError];
+    NSLog(@"%@", responseObject);
+  }
+}];
+[task resume];`;
+
+      case "ruby":
+        return `require 'uri'
+require 'net/http'
+require 'json'
+
+uri = URI('${apiUrl}')
+http = Net::HTTP.new(uri.host, uri.port)
+http.use_ssl = true
+
+request = Net::HTTP::${method.charAt(0).toUpperCase() + method.slice(1).toLowerCase()}.new(uri.path)
+request['X-API-KEY'] = '${apiKey}'
+request['Content-Type'] = 'application/json'
+${method === "POST" || method === "PUT" ? `request.body = '${requestBody}'` : ""}
+
+response = http.request(request)
+puts response.read_body`;
+
+      case "c":
+        return `#include <stdio.h>
+#include <curl/curl.h>
+
+int main(void)
+{
+  CURL *curl;
+  CURLcode res;
+  
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_URL, "${apiUrl}");
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "${method}");
+    
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, "X-API-KEY: ${apiKey}");
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    
+    ${method === "POST" || method === "PUT" ? `curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "${requestBody.replace(/"/g, '\\"')}");` : ""}
+    
+    res = curl_easy_perform(curl);
+    if(res != CURLE_OK) {
+      fprintf(stderr, "curl_easy_perform() failed: %s\\n", curl_easy_strerror(res));
+    }
+    
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+  }
+  
+  return 0;
+}`;
+
+      case "http":
+        return `${method} ${apiUrl} HTTP/1.1
+X-API-KEY: ${apiKey}
+Content-Type: application/json
+${method === "POST" || method === "PUT" ? `
+
+${requestBody}` : ""}`;
+
+      default:
+        return "Select a language to see code examples";
+    }
   };
 
   return (
@@ -180,6 +459,16 @@ export default function ApiDocumentation({
             <div>
               <h2 className="text-xl font-semibold mb-4">Parameters</h2>
               
+              <div className="mb-4">
+                <label className="text-sm font-medium">API Base URL:</label>
+                <Input
+                  type="text"
+                  value={baseUrl}
+                  className="w-full mt-1 bg-background border rounded-md px-3 py-2 text-sm"
+                  readOnly
+                />
+              </div>
+              
               {queryParams.length > 0 && (
                 <div className="mb-8">
                   <h3 className="text-lg font-medium mb-4">Query Parameters</h3>
@@ -187,10 +476,10 @@ export default function ApiDocumentation({
                     <table className="w-full text-sm">
                       <thead className="bg-secondary text-left">
                         <tr>
-                          <th className="p-3">Name</th>
+                          <th className="p-3">Parameter</th>
                           <th className="p-3">Type</th>
                           <th className="p-3">Required</th>
-                          <th className="p-3">Description</th>
+                          <th className="p-3 w-2/5">Value</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -205,7 +494,14 @@ export default function ApiDocumentation({
                                 <span className="text-muted-foreground">optional</span>
                               )}
                             </td>
-                            <td className="p-3">{param.description}</td>
+                            <td className="p-3">
+                              <Input 
+                                placeholder={`Example: ${param.description}`}
+                                value={queryParamsValues[param.name] || ''}
+                                onChange={(e) => handleQueryParamChange(param.name, e.target.value)}
+                                className="w-full bg-background"
+                              />
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -221,10 +517,10 @@ export default function ApiDocumentation({
                     <table className="w-full text-sm">
                       <thead className="bg-secondary text-left">
                         <tr>
-                          <th className="p-3">Name</th>
+                          <th className="p-3">Parameter</th>
                           <th className="p-3">Type</th>
                           <th className="p-3">Required</th>
-                          <th className="p-3">Description</th>
+                          <th className="p-3 w-2/5">Value</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -239,7 +535,14 @@ export default function ApiDocumentation({
                                 <span className="text-muted-foreground">optional</span>
                               )}
                             </td>
-                            <td className="p-3">{param.description}</td>
+                            <td className="p-3">
+                              <Input 
+                                placeholder={`Example: ${param.description}`}
+                                value={headerParamsValues[param.name] || ''}
+                                onChange={(e) => handleHeaderParamChange(param.name, e.target.value)}
+                                className="w-full bg-background"
+                              />
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -265,7 +568,7 @@ export default function ApiDocumentation({
                 </div>
                 
                 <div className="p-2 bg-accent/30 text-sm rounded-md mb-4">
-                  <p>Tip: Fill in the values between quotes for the fields you want to include in your request. <span className="text-primary">Generate Template</span></p>
+                  <p>Tip: Fill in the values between quotes for the fields you want to include in your request. <span className="text-primary cursor-pointer">Generate Template</span></p>
                 </div>
                 
                 <div className="border rounded-md">
@@ -284,10 +587,10 @@ export default function ApiDocumentation({
                     <table className="w-full text-sm">
                       <thead className="bg-secondary text-left">
                         <tr>
-                          <th className="p-3">Name</th>
+                          <th className="p-3">Parameter</th>
                           <th className="p-3">Type</th>
                           <th className="p-3">Required</th>
-                          <th className="p-3">Description</th>
+                          <th className="p-3 w-2/5">Value</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -302,7 +605,14 @@ export default function ApiDocumentation({
                                 <span className="text-muted-foreground">optional</span>
                               )}
                             </td>
-                            <td className="p-3">{param.description}</td>
+                            <td className="p-3">
+                              <Input 
+                                placeholder={`Example: ${param.description}`}
+                                value={bodyParamsValues[param.name] || ''}
+                                onChange={(e) => handleBodyParamChange(param.name, e.target.value)}
+                                className="w-full bg-background"
+                              />
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -435,8 +745,8 @@ export default function ApiDocumentation({
       </div>
 
       {showResponse && (
-        <div className="responses-container mb-8">
-          <div className="responses-header" onClick={() => setIsResponseCollapsed(!isResponseCollapsed)}>
+        <div className="responses-container mb-8" id="response-section">
+          <div className="responses-header cursor-pointer" onClick={() => setIsResponseCollapsed(!isResponseCollapsed)}>
             <h3 className="text-lg font-medium">Responses</h3>
             <button>
               {isResponseCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
@@ -461,12 +771,85 @@ export default function ApiDocumentation({
               </div>
               
               <div className="response-tables border-t p-4">
-                <div className="response-table">
-                  <div className="response-table-header">
-                    <h4 className="font-medium">Example</h4>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="response-table">
+                    <div className="response-table-header">
+                      <h4 className="font-medium">application/json</h4>
+                    </div>
+                    <div className="response-table-content h-96 overflow-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-secondary/30 text-left">
+                          <tr>
+                            <th className="p-3">Field</th>
+                            <th className="p-3">Type</th>
+                            <th className="p-3">Required</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="p-3 text-blue-400">employee_id</td>
+                            <td className="p-3">string</td>
+                            <td className="p-3"><span className="required-badge">required</span></td>
+                          </tr>
+                          <tr className="bg-secondary/30">
+                            <td className="p-3 text-blue-400">first_name</td>
+                            <td className="p-3">string</td>
+                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 text-blue-400">last_name</td>
+                            <td className="p-3">string</td>
+                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
+                          </tr>
+                          <tr className="bg-secondary/30">
+                            <td className="p-3 text-blue-400">email</td>
+                            <td className="p-3">string</td>
+                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 text-blue-400">phone_number</td>
+                            <td className="p-3">string</td>
+                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
+                          </tr>
+                          <tr className="bg-secondary/30">
+                            <td className="p-3 text-blue-400">hire_date</td>
+                            <td className="p-3">string</td>
+                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 text-blue-400">job_title</td>
+                            <td className="p-3">string</td>
+                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
+                          </tr>
+                          <tr className="bg-secondary/30">
+                            <td className="p-3 text-blue-400">job_id</td>
+                            <td className="p-3">integer</td>
+                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
+                          </tr>
+                          <tr>
+                            <td className="p-3 text-blue-400">department</td>
+                            <td className="p-3">string</td>
+                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
+                          </tr>
+                          <tr className="bg-secondary/30">
+                            <td className="p-3 text-blue-400">status</td>
+                            <td className="p-3">string</td>
+                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                  <div className="response-table-content">
-                    <pre>{JSON.stringify(responseData, null, 2)}</pre>
+                  
+                  <div className="response-table">
+                    <div className="response-table-header">
+                      <h4 className="font-medium">Example</h4>
+                    </div>
+                    <div className="response-table-content h-96 overflow-auto">
+                      <pre className="p-4 font-mono text-sm">
+                        {JSON.stringify(responseData, null, 2)}
+                      </pre>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -475,64 +858,119 @@ export default function ApiDocumentation({
         </div>
       )}
 
-      <div className="request-samples">
+      <div className="request-samples bg-background">
         <h2 className="text-xl font-semibold mb-4">Request samples</h2>
-        <div className="sample-tabs">
-          <div className="sample-tab">
+        <div className="sample-tabs grid grid-cols-7 md:grid-cols-12 gap-2 mb-4">
+          <button 
+            className={`sample-tab ${activeLanguage === 'curl' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('curl')}
+          >
             <span className="sample-icon text-green-400">⌘</span>
             <span>Shell</span>
-          </div>
-          <div className="sample-tab">
+          </button>
+          <button 
+            className={`sample-tab ${activeLanguage === 'js' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('js')}
+          >
             <span className="sample-icon text-yellow-400">JS</span>
             <span>JavaScript</span>
-          </div>
-          <div className="sample-tab">
+          </button>
+          <button 
+            className={`sample-tab ${activeLanguage === 'java' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('java')}
+          >
             <span className="sample-icon text-orange-400">☕</span>
             <span>Java</span>
-          </div>
-          <div className="sample-tab">
+          </button>
+          <button 
+            className={`sample-tab ${activeLanguage === 'swift' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('swift')}
+          >
             <span className="sample-icon text-orange-400">🔶</span>
             <span>Swift</span>
-          </div>
-          <div className="sample-tab">
-            <span className="sample-icon text-blue-400">GO</span>
+          </button>
+          <button 
+            className={`sample-tab ${activeLanguage === 'go' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('go')}
+          >
+            <span className="sample-icon text-blue-400">Go</span>
             <span>Go</span>
-          </div>
-          <div className="sample-tab">
+          </button>
+          <button 
+            className={`sample-tab ${activeLanguage === 'php' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('php')}
+          >
             <span className="sample-icon text-blue-400">PHP</span>
             <span>PHP</span>
-          </div>
-          <div className="sample-tab">
+          </button>
+          <button 
+            className={`sample-tab ${activeLanguage === 'python' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('python')}
+          >
             <span className="sample-icon text-blue-400">🐍</span>
             <span>Python</span>
-          </div>
-          <div className="sample-tab">
+          </button>
+          <button 
+            className={`sample-tab ${activeLanguage === 'http' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('http')}
+          >
             <span className="sample-icon text-blue-400">HTTP</span>
             <span>HTTP</span>
-          </div>
-          <div className="sample-tab">
+          </button>
+          <button 
+            className={`sample-tab ${activeLanguage === 'c' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('c')}
+          >
             <span className="sample-icon text-blue-400">C</span>
             <span>C</span>
-          </div>
-          <div className="sample-tab">
+          </button>
+          <button 
+            className={`sample-tab ${activeLanguage === 'c#' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('c#')}
+          >
             <span className="sample-icon text-green-400">C#</span>
             <span>C#</span>
-          </div>
-          <div className="sample-tab">
-            <span className="sample-icon text-gray-400">C</span>
+          </button>
+          <button 
+            className={`sample-tab ${activeLanguage === 'objc' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('objc')}
+          >
+            <span className="sample-icon text-gray-400">[C]</span>
             <span>Objective-C</span>
-          </div>
-          <div className="sample-tab">
+          </button>
+          <button 
+            className={`sample-tab ${activeLanguage === 'ruby' ? 'bg-accent' : ''}`}
+            onClick={() => setActiveLanguage('ruby')}
+          >
             <span className="sample-icon text-red-400">💎</span>
             <span>Ruby</span>
+          </button>
+        </div>
+        
+        <div className="border rounded-md overflow-hidden">
+          <div className="bg-secondary p-3 flex justify-between items-center">
+            <span className="text-sm font-medium">{activeLanguage === 'curl' ? 'Shell' : activeLanguage === 'js' ? 'JavaScript' : activeLanguage === 'c#' ? 'C#' : activeLanguage === 'objc' ? 'Objective-C' : activeLanguage.charAt(0).toUpperCase() + activeLanguage.slice(1)}</span>
+            <button 
+              className="code-btn flex items-center space-x-1"
+              onClick={() => copyToClipboard(getSampleCode(activeLanguage))}
+            >
+              {isCopied ? (
+                <>
+                  <Check size={14} />
+                  <span>Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy size={14} />
+                  <span>Copy</span>
+                </>
+              )}
+            </button>
           </div>
-          <div className="sample-tab">
-            <span className="sample-icon text-yellow-400">ML</span>
-            <span>OCaml</span>
-          </div>
-          <div className="sample-tab">
-            <span className="sample-icon text-blue-400">🎯</span>
-            <span>Dart</span>
+          <div className="p-4 bg-background max-h-72 overflow-auto">
+            <pre className="text-sm font-mono text-muted-foreground">
+              {getSampleCode(activeLanguage)}
+            </pre>
           </div>
         </div>
       </div>

@@ -5,6 +5,14 @@ import ApiDocumentation from "../components/ApiDocumentation";
 import ApiUsePanel from "../components/ApiUsePanel";
 import { apiEndpoints } from "../data/apiData";
 
+interface Parameter {
+  name: string;
+  type: string;
+  required: boolean;
+  description: string;
+  value?: string;
+}
+
 const Index = () => {
   const [activeEndpoint, setActiveEndpoint] = useState("get-all-policies");
   const [showApiUsePanel, setShowApiUsePanel] = useState(false);
@@ -30,11 +38,11 @@ const Index = () => {
           endpoint={currentEndpoint.title}
           method={currentEndpoint.method}
           title={currentEndpoint.title}
-          baseUrl={currentEndpoint.baseUrl}
+          baseUrl={currentEndpoint.baseUrl.replace("spectrum", "xpectrum")}
           path={currentEndpoint.path}
-          queryParams={currentEndpoint.queryParams}
-          headerParams={currentEndpoint.headerParams}
-          bodyParams={currentEndpoint.bodyParams}
+          queryParams={currentEndpoint.queryParams as Parameter[]}
+          headerParams={currentEndpoint.headerParams as Parameter[]}
+          bodyParams={currentEndpoint.bodyParams as Parameter[]}
           responseExample={currentEndpoint.responseExample}
           onUseApi={handleUseApi}
           isApiPanelOpen={showApiUsePanel}
@@ -44,7 +52,7 @@ const Index = () => {
         <ApiUsePanel 
           endpoint={currentEndpoint.title}
           method={currentEndpoint.method}
-          baseUrl={currentEndpoint.baseUrl}
+          baseUrl={currentEndpoint.baseUrl.replace("spectrum", "xpectrum")}
           path={currentEndpoint.path}
           onClose={() => setShowApiUsePanel(false)}
         />

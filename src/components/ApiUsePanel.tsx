@@ -201,36 +201,45 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
         </div>
       </div>
       
-      <ScrollArea className="flex-1">
-        <div className="p-4 border-b bg-background">
-          <div className="flex items-center space-x-2">
-            <span className={`method-tab ${method.toLowerCase()}-tag`}>{method}</span>
-            <Input
-              type="text"
-              value={`${baseUrlValue}${path}`}
-              onChange={(e) => setBaseUrlValue(e.target.value)}
-              className="flex-1 bg-background border rounded-md px-3 py-1 text-sm"
-            />
-            <button 
-              className={`py-1 px-3 rounded-md text-sm font-medium ${isLoading ? 'bg-primary/50' : 'bg-primary'} text-white`}
-              onClick={handleSendRequest}
-              disabled={isLoading}
-            >
-              {isLoading ? "Sending..." : "Send"}
-            </button>
-          </div>
-          
-          <div className="mt-4">
-            <label className="text-sm font-medium">API Base URL:</label>
-            <Input
-              type="text"
-              value={baseUrlValue}
-              onChange={(e) => setBaseUrlValue(e.target.value)}
-              className="w-full mt-1 bg-background border rounded-md px-3 py-2 text-sm"
-            />
-          </div>
+      <div className="p-4 border-b bg-background">
+        <div className="flex items-center space-x-2">
+          <span className={`method-tab ${method.toLowerCase()}-tag`}>{method}</span>
+          <Input
+            type="text"
+            value={`${baseUrlValue}${path}`}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value.startsWith(baseUrlValue)) {
+                // If the path is being edited
+                const newPath = value.substring(baseUrlValue.length);
+              } else {
+                // The baseUrl is being edited
+                setBaseUrlValue(value.split(path)[0] || value);
+              }
+            }}
+            className="flex-1 bg-background border rounded-md px-3 py-1 text-sm"
+          />
+          <button 
+            className={`py-1 px-3 rounded-md text-sm font-medium ${isLoading ? 'bg-primary/50' : 'bg-primary'} text-white`}
+            onClick={handleSendRequest}
+            disabled={isLoading}
+          >
+            {isLoading ? "Sending..." : "Send"}
+          </button>
         </div>
         
+        <div className="mt-4">
+          <label className="text-sm font-medium">API Base URL:</label>
+          <Input
+            type="text"
+            value={baseUrlValue}
+            onChange={(e) => setBaseUrlValue(e.target.value)}
+            className="w-full mt-1 bg-background border rounded-md px-3 py-2 text-sm"
+          />
+        </div>
+      </div>
+      
+      <ScrollArea className="flex-1 overflow-auto">
         <div className="border-b bg-background">
           <div className="flex border-b">
             <button 
@@ -388,12 +397,28 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
                   <div className="flex items-center space-x-2">
                     <Input
                       type="text"
+                      defaultValue="X-API-KEY"
+                      className="param-field flex-1 bg-background"
+                    />
+                    <Input
+                      type="text"
+                      defaultValue="your_api_key"
+                      className="param-field flex-1 bg-background"
+                    />
+                    <button className="px-3 py-2 bg-red-500/20 text-red-400 rounded-md">
+                      Remove
+                    </button>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      type="text"
                       defaultValue="Authorization"
                       className="param-field flex-1 bg-background"
                     />
                     <Input
                       type="text"
-                      defaultValue="Bearer token123"
+                      defaultValue="Bearer token"
                       className="param-field flex-1 bg-background"
                     />
                     <button className="px-3 py-2 bg-red-500/20 text-red-400 rounded-md">
