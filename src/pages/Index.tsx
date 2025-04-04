@@ -37,6 +37,7 @@ const Index = () => {
           bodyParams={currentEndpoint.bodyParams}
           responseExample={currentEndpoint.responseExample}
           onUseApi={handleUseApi}
+          isApiPanelOpen={showApiUsePanel}
         />
       </div>
       {showApiUsePanel && (

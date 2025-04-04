@@ -1,14 +1,9 @@
 
 import { useState } from "react";
-import { Copy, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Copy } from "lucide-react";
 import { Input } from "./ui/input";
-
-interface ParameterProps {
-  name: string;
-  type: string;
-  required: boolean;
-  example: string;
-}
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
 
 interface ApiDocumentationProps {
   endpoint: string;
@@ -16,11 +11,12 @@ interface ApiDocumentationProps {
   title: string;
   baseUrl: string;
   path: string;
-  queryParams?: ParameterProps[];
-  headerParams?: ParameterProps[];
-  responseExample: any;
-  bodyParams?: ParameterProps[];
+  queryParams?: { name: string; type: string; required: boolean; description: string }[];
+  headerParams?: { name: string; type: string; required: boolean; description: string }[];
+  bodyParams?: { name: string; type: string; required: boolean; description: string }[];
+  responseExample?: Record<string, any>;
   onUseApi: () => void;
+  isApiPanelOpen?: boolean;
 }
 
 export default function ApiDocumentation({
@@ -31,470 +27,515 @@ export default function ApiDocumentation({
   path,
   queryParams = [],
   headerParams = [],
-  responseExample,
   bodyParams = [],
-  onUseApi
+  responseExample = {},
+  onUseApi,
+  isApiPanelOpen = false
 }: ApiDocumentationProps) {
-  const [activeTab, setActiveTab] = useState("all");
-  const [response, setResponse] = useState<any>(null);
-  const [responseStatus, setResponseStatus] = useState<{code: number; text: string; time: string; size: string} | null>(null);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [responseTab, setResponseTab] = useState("schema");
   const [isResponseCollapsed, setIsResponseCollapsed] = useState(false);
-  
-  const formatJson = (obj: any) => {
-    return JSON.stringify(obj, null, 2);
-  };
-  
-  const getSampleCode = (language: string) => {
-    const url = `${baseUrl}${path}`;
-    
-    switch (language) {
-      case "curl":
-        return `curl --location --request ${method} '${url}' \\
---header 'X-SOURCE: admin' \\
---header 'X-LANG: en' \\
---header 'X-REQUEST-ID: insurify' \\
---header 'X-DEVICE-ID: insurify_device' \\
---header 'x-api-key: your_api_key' \\
---header 'Content-Type: application/json'`;
-      case "js":
-        return `const options = {
-  method: '${method}',
-  headers: {
-    'X-API-KEY': 'your_api_key',
-    'Content-Type': 'application/json'
-  }
-};
+  const [showResponse, setShowResponse] = useState(false);
+  const [requestBody, setRequestBody] = useState(`{
+  "employee_id": "",
+  "first_name": "",
+  "last_name": "",
+  "email": "",
+  "phone_number": "",
+  "hire_date": "",
+  "job_title": "",
+  "job_id": 0,
+  "gov_id": "",
+  "hiring_manager_id": "",
+  "hr_manager_id": "",
+  "marital_status": "",
+  "state": "",
+  "emergency_contact_name": ""
+}`);
 
-fetch('${url}', options)
-  .then(response => response.json())
-  .then(data => console.log(data))
-  .catch(error => console.error(error));`;
-      default:
-        return `// Code sample for ${language} not available`;
-    }
+  const responseData = {
+    "employees": [
+      {
+        "employee_id": "EMP003",
+        "first_name": "John", 
+        "last_name": "Smith",
+        "email": "john.smith@example.com",
+        "phone_number": "+1 123-456-7890",
+        "hire_date": "2023-05-15",
+        "job_title": "Software Developer",
+        "job_id": 3,
+        "hiring_manager_id": "EMP005",
+        "hr_manager_id": "EMP010",
+        "department": "Engineering",
+        "status": "active"
+      }
+    ],
+    "total": 87,
+    "page": 1,
+    "limit": 10
   };
-  
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
   const handleSendRequest = () => {
-    // Simulate API call
-    setTimeout(() => {
-      const responseData = getResponseData();
-      const statusCode = Math.random() > 0.9 ? 400 : 200;
-      
-      setResponse(responseData);
-      setResponseStatus({
-        code: statusCode,
-        text: statusCode === 200 ? "OK" : "Bad Request",
-        time: `${Math.floor(Math.random() * 3000) + 100} ms`,
-        size: `${Math.floor(Math.random() * 100) + 10}.${Math.floor(Math.random() * 90) + 10} KB`
-      });
-    }, 800);
+    setShowResponse(true);
   };
-  
-  const getResponseData = () => {
-    if (endpoint.toLowerCase().includes("policy")) {
-      return {
-        "policies": [
-          {
-            "policy_id": "POL12345",
-            "first_name": "John",
-            "last_name": "Smith",
-            "email": "john.smith@example.com",
-            "phone_number": "+1 123-456-7890",
-            "start_date": "2023-01-15",
-            "end_date": "2024-01-14",
-            "policy_type": "Auto Insurance",
-            "premium_amount": 1200,
-            "coverage_amount": 50000,
-            "status": "active",
-            "created_at": "2023-01-10T14:30:45Z"
-          }
-        ],
-        "total": 100,
-        "page": 1,
-        "limit": 10
-      };
-    } else if (endpoint.toLowerCase().includes("claims")) {
-      return {
-        "claims": [
-          {
-            "claim_id": "CLM98765",
-            "policy_id": "POL12345",
-            "incident_date": "2023-05-20",
-            "filing_date": "2023-05-22",
-            "claim_type": "Collision",
-            "claim_amount": 3500,
-            "status": "pending",
-            "description": "Vehicle damage from rear-end collision"
-          }
-        ],
-        "total": 45,
-        "page": 1,
-        "limit": 10
-      };
-    } else if (endpoint.toLowerCase().includes("premium")) {
-      return {
-        "premium_records": [
-          {
-            "premium_id": "PRM56789",
-            "policy_id": "POL12345",
-            "amount": 1200,
-            "frequency": "annual",
-            "next_due_date": "2024-01-15",
-            "payment_method": "credit_card",
-            "is_autopay": true
-          }
-        ],
-        "total": 32,
-        "page": 1,
-        "limit": 10
-      };
-    } else if (endpoint.toLowerCase().includes("coverage")) {
-      return {
-        "coverage_details": [
-          {
-            "coverage_id": "COV34567",
-            "policy_id": "POL12345",
-            "coverage_type": "Comprehensive",
-            "coverage_limit": 50000,
-            "deductible": 500,
-            "is_active": true,
-            "coverage_start": "2023-01-15",
-            "coverage_end": "2024-01-14"
-          }
-        ],
-        "total": 28,
-        "page": 1,
-        "limit": 10
-      };
-    } else if (endpoint.toLowerCase().includes("employee")) {
-      return {
-        "employees": [
-          {
-            "employee_id": "EM3278",
-            "first_name": "Mark", 
-            "last_name": "Figueroa",
-            "email": "jeffreydoyle@example.net",
-            "phone_number": "001-581-896-0013x3890",
-            "hire_date": "2021-02-19",
-            "job_title": "Theme park manager",
-            "job_id": 284,
-            "gov_id": "829-01-2616",
-            "hiring_manager_id": "E001",
-            "hr_manager_id": "E009",
-            "marital_status": "single",
-            "state": "California",
-            "emergency_contact_name": "Gina Moore",
-            "emergency_contact_phone": "001-851-316-1559x40781"
-          }
-        ],
-        "total": 87,
-        "page": 1,
-        "limit": 10
-      };
-    } else {
-      return {
-        "message": "Operation successful",
-        "status": "success",
-        "timestamp": new Date().toISOString()
-      };
-    }
-  };
-  
-  const copyToClipboard = () => {
-    if (response) {
-      navigator.clipboard.writeText(JSON.stringify(response, null, 2));
-    }
-  };
-  
+
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <div className="mb-8">
-        <div className="uppercase text-sm text-muted-foreground mb-2">INSURANCE</div>
-        <div className="flex justify-between items-center">
-          <h1 className="text-4xl font-bold mb-2">{title}</h1>
+    <div className="p-8 max-w-5xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <div className="flex items-center gap-3">
+            <span className={`method-tab ${method.toLowerCase()}-tag`}>{method}</span>
+            <h1 className="text-2xl font-bold">{title}</h1>
+          </div>
+          <p className="text-muted-foreground mt-1">
+            <span className="text-blue-400">{baseUrl}</span>
+            <span>{path}</span>
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
           <span className="status-stable">STABLE</span>
+          <Button
+            variant="outline"
+            className={`use-api-btn ${isApiPanelOpen ? 'bg-secondary hover:bg-secondary/90' : ''}`}
+            onClick={onUseApi}
+          >
+            {isApiPanelOpen ? 'Close API' : 'Use API'}
+          </Button>
         </div>
       </div>
-      
-      <div className="mb-8 flex items-center space-x-4">
-        <div className={`method-tab ${method.toLowerCase()}-tag`}>{method}</div>
-        <div className="flex-1 font-mono text-sm bg-secondary p-2 rounded-md">
-          {baseUrl}{path}
-        </div>
-        <button 
-          className="use-api-btn"
-          onClick={onUseApi}
-        >
-          Use API
-        </button>
-      </div>
-      
+
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Request</h2>
-        
-        {queryParams.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-xl font-medium mb-4">Query Params</h3>
-            <div className="bg-secondary/50 rounded-lg overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-secondary">
-                  <tr>
-                    <th className="text-left p-4">Parameter</th>
-                    <th className="text-left p-4">Type</th>
-                    <th className="text-left p-4">Required</th>
-                    <th className="text-left p-4"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {queryParams.map((param, index) => (
-                    <tr key={index} className="border-t border-border">
-                      <td className="p-4 text-blue-400">{param.name}</td>
-                      <td className="p-4">{param.type}</td>
-                      <td className="p-4">
-                        {param.required ? (
-                          <span className="required-badge">required</span>
-                        ) : (
-                          <span>optional</span>
-                        )}
-                      </td>
-                      <td className="p-4 text-muted-foreground">
-                        Example: {param.example}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-        
-        {headerParams.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-xl font-medium mb-4">Header Params</h3>
-            <div className="bg-secondary/50 rounded-lg overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-secondary">
-                  <tr>
-                    <th className="text-left p-4">Parameter</th>
-                    <th className="text-left p-4">Type</th>
-                    <th className="text-left p-4">Required</th>
-                    <th className="text-left p-4"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {headerParams.map((param, index) => (
-                    <tr key={index} className="border-t border-border">
-                      <td className="p-4 text-blue-400">{param.name}</td>
-                      <td className="p-4">{param.type}</td>
-                      <td className="p-4">
-                        {param.required ? (
-                          <span className="required-badge">required</span>
-                        ) : (
-                          <span>optional</span>
-                        )}
-                      </td>
-                      <td className="p-4 text-muted-foreground">
-                        {param.example}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-        
-        {(method === "POST" || method === "PUT" || method === "PATCH") && bodyParams.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-xl font-medium mb-4">Request Body</h3>
-            <div className="bg-secondary/50 rounded-lg overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-secondary">
-                  <tr>
-                    <th className="text-left p-4">Parameter</th>
-                    <th className="text-left p-4">Type</th>
-                    <th className="text-left p-4">Required</th>
-                    <th className="text-left p-4"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bodyParams.map((param, index) => (
-                    <tr key={index} className="border-t border-border">
-                      <td className="p-4 text-blue-400">{param.name}</td>
-                      <td className="p-4">{param.type}</td>
-                      <td className="p-4">
-                        {param.required ? (
-                          <span className="required-badge">required</span>
-                        ) : (
-                          <span>optional</span>
-                        )}
-                      </td>
-                      <td className="p-4 text-muted-foreground">
-                        {param.example}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">Request samples</h2>
-        
-        <div className="mb-4">
-          <div className="flex border-b">
-            <button
-              className={`tab-button ${activeTab === "all" ? "active" : ""}`}
-              onClick={() => setActiveTab("all")}
-            >
-              All
-            </button>
-            <button
-              className={`tab-button ${activeTab === "js" ? "active" : ""}`}
-              onClick={() => setActiveTab("js")}
-            >
-              JS
-            </button>
-            <button
-              className={`tab-button ${activeTab === "python" ? "active" : ""}`}
-              onClick={() => setActiveTab("python")}
-            >
-              Python
-            </button>
-            <button
-              className={`tab-button ${activeTab === "curl" ? "active" : ""}`}
-              onClick={() => setActiveTab("curl")}
-            >
-              cURL
-            </button>
-          </div>
+        <div className="p-3 border rounded-md flex items-center space-x-2">
+          <span className={`method-tab ${method.toLowerCase()}-tag`}>{method}</span>
+          <Input
+            type="text"
+            value={`${baseUrl}${path}`}
+            className="flex-1 bg-background"
+            readOnly
+          />
+          <Button 
+            className="bg-primary hover:bg-primary/90 text-white" 
+            onClick={handleSendRequest}
+          >
+            Send
+          </Button>
         </div>
-        
-        <div className="relative">
-          <pre className="bg-secondary rounded-md p-4 overflow-auto text-sm font-mono">
-            {getSampleCode(activeTab === "all" ? "curl" : activeTab)}
-          </pre>
-          <button className="absolute top-2 right-2 p-2 bg-muted rounded-md opacity-70 hover:opacity-100 transition-opacity">
-            <Copy size={14} />
+      </div>
+
+      <div className="mb-8">
+        <div className="flex space-x-1 border-b">
+          <button
+            className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
+            onClick={() => setActiveTab('overview')}
+          >
+            Overview
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'parameters' ? 'active' : ''}`}
+            onClick={() => setActiveTab('parameters')}
+          >
+            Parameters
+          </button>
+          {(method === "POST" || method === "PUT" || method === "PATCH") && (
+            <button
+              className={`tab-button ${activeTab === 'body' ? 'active' : ''}`}
+              onClick={() => setActiveTab('body')}
+            >
+              Request Body
+            </button>
+          )}
+          <button
+            className={`tab-button ${activeTab === 'responses' ? 'active' : ''}`}
+            onClick={() => setActiveTab('responses')}
+          >
+            Responses
           </button>
         </div>
-      </div>
-      
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold">Responses</h2>
-          <div className="flex items-center space-x-3">
-            <button 
-              className="bg-primary text-white px-4 py-2 rounded-md text-sm"
-              onClick={handleSendRequest}
-            >
-              Send
-            </button>
-            <button className="code-btn">
-              Generate Code
-            </button>
-          </div>
-        </div>
-        
-        <div className="mb-4 bg-secondary rounded-t-md overflow-hidden">
-          <div className="p-3 flex items-center space-x-2">
-            <span className="success-badge">
-              <span className="mr-1 h-2 w-2 rounded-full bg-emerald-500 inline-block"></span>
-              <span>200</span>
-            </span>
-            <span>Success</span>
-          </div>
-        </div>
-        
-        <div className="mb-10">
-          <div className="mb-4 p-4 bg-secondary">
-            <span>application/json</span>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
+
+        <div className="py-6">
+          {activeTab === 'overview' && (
             <div>
-              <div className="mb-2 p-4 bg-secondary">
-                <span>application/json</span>
+              <h2 className="text-xl font-semibold mb-4">Overview</h2>
+              <p className="text-muted-foreground mb-4">
+                This endpoint allows you to {method === 'GET' ? 'retrieve' : method === 'POST' ? 'create' : method === 'PUT' ? 'update' : 'delete'} {endpoint.toLowerCase().includes('policies') ? 'insurance policies' : endpoint.toLowerCase().includes('claims') ? 'insurance claims' : endpoint.toLowerCase().includes('coverage') ? 'coverage details' : endpoint.toLowerCase().includes('premium') ? 'premium information' : 'user data'}.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="border rounded-md p-4">
+                  <h3 className="font-medium mb-2">Base URL</h3>
+                  <p className="text-blue-400 font-mono">{baseUrl}</p>
+                </div>
+                <div className="border rounded-md p-4">
+                  <h3 className="font-medium mb-2">Endpoint</h3>
+                  <p className="font-mono">{path}</p>
+                </div>
               </div>
-              <table className="w-full text-sm">
-                <tbody>
-                  {Object.entries(responseExample.schema || {}).map(([key, value]: [string, any], index) => (
-                    <tr key={index} className={index > 0 ? "border-t border-border" : ""}>
-                      <td className="p-4 text-blue-400">{key}</td>
-                      <td className="p-4">{value.type}</td>
-                      <td className="p-4">
-                        {value.required ? (
-                          <span className="required-badge">required</span>
-                        ) : (
-                          <span className="text-muted-foreground">optional</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
-            
+          )}
+
+          {activeTab === 'parameters' && (
             <div>
-              <div className="mb-2 p-4 bg-secondary">
-                <span>Example</span>
-              </div>
-              <div className="bg-secondary/50 p-4 rounded-md">
-                <pre className="text-sm font-mono overflow-auto" style={{ maxHeight: "400px" }}>
-                  {formatJson(responseExample.example)}
-                </pre>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {responseStatus && (
-        <div className="bg-background border border-border rounded-md overflow-hidden shadow-sm">
-          <div className="p-4">
-            <div className="flex justify-between items-center mb-2 cursor-pointer" 
-                onClick={() => setIsResponseCollapsed(!isResponseCollapsed)}>
-              <h4 className="text-lg font-medium">Response</h4>
-              <button className="text-muted-foreground hover:text-foreground">
-                {isResponseCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-              </button>
-            </div>
-            
-            <div className="flex items-center space-x-2 mt-1">
-              <div className={`${responseStatus.code >= 200 && responseStatus.code < 300 ? 'success-badge' : 'error-badge'}`}>
-                <span className={`mr-1 h-2 w-2 rounded-full ${responseStatus.code >= 200 && responseStatus.code < 300 ? 'bg-emerald-500' : 'bg-red-500'} inline-block`}></span>
-                <span>{responseStatus.code} {responseStatus.text}</span>
-              </div>
-              <span className="text-xs text-muted-foreground">{responseStatus.time}</span>
-              <span className="text-xs text-muted-foreground">{responseStatus.size}</span>
-            </div>
-            
-            {!isResponseCollapsed && (
-              <div className="mt-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2">
-                    <h5 className="font-medium">Response Body</h5>
-                    <span className="px-2 py-0.5 bg-emerald-600/20 text-emerald-500 rounded-md text-xs">API Data</span>
+              <h2 className="text-xl font-semibold mb-4">Parameters</h2>
+              
+              {queryParams.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-lg font-medium mb-4">Query Parameters</h3>
+                  <div className="border rounded-md overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-secondary text-left">
+                        <tr>
+                          <th className="p-3">Name</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Required</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {queryParams.map((param, index) => (
+                          <tr key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
+                            <td className="p-3 text-blue-400">{param.name}</td>
+                            <td className="p-3 text-muted-foreground">{param.type}</td>
+                            <td className="p-3">
+                              {param.required ? (
+                                <span className="required-badge">required</span>
+                              ) : (
+                                <span className="text-muted-foreground">optional</span>
+                              )}
+                            </td>
+                            <td className="p-3">{param.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <button className="copy-button flex items-center space-x-1" onClick={copyToClipboard}>
-                    <Copy size={14} />
-                    <span>Copy</span>
+                </div>
+              )}
+              
+              {headerParams.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Header Parameters</h3>
+                  <div className="border rounded-md overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-secondary text-left">
+                        <tr>
+                          <th className="p-3">Name</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Required</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {headerParams.map((param, index) => (
+                          <tr key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
+                            <td className="p-3 text-blue-400">{param.name}</td>
+                            <td className="p-3 text-muted-foreground">{param.type}</td>
+                            <td className="p-3">
+                              {param.required ? (
+                                <span className="required-badge">required</span>
+                              ) : (
+                                <span className="text-muted-foreground">optional</span>
+                              )}
+                            </td>
+                            <td className="p-3">{param.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'body' && (
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Request Body</h2>
+              
+              <div className="mb-4">
+                <div className="flex mb-2">
+                  <button className="px-3 py-1 bg-secondary text-foreground rounded-l-md text-sm border-r">
+                    Form
+                  </button>
+                  <button className="px-3 py-1 bg-background text-foreground rounded-r-md text-sm">
+                    Raw
                   </button>
                 </div>
                 
-                <div className="border border-border rounded-md">
-                  <pre className="p-4 text-sm font-mono overflow-auto" style={{ maxHeight: "400px" }}>
-                    {JSON.stringify(response, null, 2)}
-                  </pre>
+                <div className="p-2 bg-accent/30 text-sm rounded-md mb-4">
+                  <p>Tip: Fill in the values between quotes for the fields you want to include in your request. <span className="text-primary">Generate Template</span></p>
+                </div>
+                
+                <div className="border rounded-md">
+                  <Textarea
+                    className="p-4 text-sm font-mono bg-background min-h-[300px] w-full border-0 focus-visible:ring-0"
+                    value={requestBody}
+                    onChange={(e) => setRequestBody(e.target.value)}
+                  />
                 </div>
               </div>
-            )}
+              
+              {bodyParams.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-medium mb-4">Body Parameters</h3>
+                  <div className="border rounded-md overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-secondary text-left">
+                        <tr>
+                          <th className="p-3">Name</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Required</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bodyParams.map((param, index) => (
+                          <tr key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
+                            <td className="p-3 text-blue-400">{param.name}</td>
+                            <td className="p-3 text-muted-foreground">{param.type}</td>
+                            <td className="p-3">
+                              {param.required ? (
+                                <span className="required-badge">required</span>
+                              ) : (
+                                <span className="text-muted-foreground">optional</span>
+                              )}
+                            </td>
+                            <td className="p-3">{param.description}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'responses' && (
+            <div>
+              <h2 className="text-xl font-semibold mb-4">Responses</h2>
+              
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-2">Response Codes</h3>
+                <div className="border rounded-md overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead className="bg-secondary text-left">
+                      <tr>
+                        <th className="p-3">Status</th>
+                        <th className="p-3">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="p-3">
+                          <span className="success-badge">200 OK</span>
+                        </td>
+                        <td className="p-3">The request was successful.</td>
+                      </tr>
+                      <tr className="bg-secondary/30">
+                        <td className="p-3">
+                          <span className="error-badge">400 Bad Request</span>
+                        </td>
+                        <td className="p-3">The request was invalid or cannot be served.</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3">
+                          <span className="error-badge">401 Unauthorized</span>
+                        </td>
+                        <td className="p-3">Authentication failed or user doesn't have permissions.</td>
+                      </tr>
+                      <tr className="bg-secondary/30">
+                        <td className="p-3">
+                          <span className="error-badge">404 Not Found</span>
+                        </td>
+                        <td className="p-3">The requested resource could not be found.</td>
+                      </tr>
+                      <tr>
+                        <td className="p-3">
+                          <span className="error-badge">500 Server Error</span>
+                        </td>
+                        <td className="p-3">An error occurred on the server.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex border-b mb-4">
+                  <button 
+                    className={`tab-button ${responseTab === 'schema' ? 'active' : ''}`}
+                    onClick={() => setResponseTab('schema')}
+                  >
+                    Schema
+                  </button>
+                  <button 
+                    className={`tab-button ${responseTab === 'example' ? 'active' : ''}`}
+                    onClick={() => setResponseTab('example')}
+                  >
+                    Example
+                  </button>
+                </div>
+                
+                <div className="border rounded-md overflow-hidden">
+                  <div className="bg-secondary p-3 flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <span className="success-badge">200 OK</span>
+                      <span className="text-xs text-muted-foreground">Success Response</span>
+                    </div>
+                    <button className="code-btn flex items-center space-x-1" onClick={() => copyToClipboard(JSON.stringify(responseExample, null, 2))}>
+                      <Copy size={14} />
+                      <span>Copy</span>
+                    </button>
+                  </div>
+                  <div className="p-4 code-container bg-background">
+                    <pre className="text-sm">
+                      {responseTab === 'schema' ? (
+                        JSON.stringify(
+                          {
+                            "type": "object",
+                            "properties": {
+                              "employees": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "employee_id": { "type": "string" },
+                                    "first_name": { "type": "string" },
+                                    "last_name": { "type": "string" },
+                                    "email": { "type": "string" },
+                                    "phone_number": { "type": "string" },
+                                    "hire_date": { "type": "string" },
+                                    "job_title": { "type": "string" },
+                                    "job_id": { "type": "integer" }
+                                  },
+                                  "required": ["employee_id"]
+                                }
+                              },
+                              "total": { "type": "integer" },
+                              "page": { "type": "integer" },
+                              "limit": { "type": "integer" }
+                            }
+                          },
+                          null,
+                          2
+                        )
+                      ) : (
+                        JSON.stringify(responseExample, null, 2)
+                      )}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {showResponse && (
+        <div className="responses-container mb-8">
+          <div className="responses-header" onClick={() => setIsResponseCollapsed(!isResponseCollapsed)}>
+            <h3 className="text-lg font-medium">Responses</h3>
+            <button>
+              {isResponseCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+            </button>
           </div>
+          
+          {!isResponseCollapsed && (
+            <>
+              <div className="response-item">
+                <div className="response-status">
+                  <div className="response-code-success">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block mr-1"></span>
+                    <span>200 Success</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground ml-2">154 ms</span>
+                  <span className="text-xs text-muted-foreground ml-2">26.45 KB</span>
+                </div>
+              </div>
+              
+              <div className="response-tabs border-t">
+                <button className="response-tab active">application/json</button>
+              </div>
+              
+              <div className="response-tables border-t p-4">
+                <div className="response-table">
+                  <div className="response-table-header">
+                    <h4 className="font-medium">Example</h4>
+                  </div>
+                  <div className="response-table-content">
+                    <pre>{JSON.stringify(responseData, null, 2)}</pre>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
+
+      <div className="request-samples">
+        <h2 className="text-xl font-semibold mb-4">Request samples</h2>
+        <div className="sample-tabs">
+          <div className="sample-tab">
+            <span className="sample-icon text-green-400">⌘</span>
+            <span>Shell</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-yellow-400">JS</span>
+            <span>JavaScript</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-orange-400">☕</span>
+            <span>Java</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-orange-400">🔶</span>
+            <span>Swift</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-blue-400">GO</span>
+            <span>Go</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-blue-400">PHP</span>
+            <span>PHP</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-blue-400">🐍</span>
+            <span>Python</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-blue-400">HTTP</span>
+            <span>HTTP</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-blue-400">C</span>
+            <span>C</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-green-400">C#</span>
+            <span>C#</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-gray-400">C</span>
+            <span>Objective-C</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-red-400">💎</span>
+            <span>Ruby</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-yellow-400">ML</span>
+            <span>OCaml</span>
+          </div>
+          <div className="sample-tab">
+            <span className="sample-icon text-blue-400">🎯</span>
+            <span>Dart</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
