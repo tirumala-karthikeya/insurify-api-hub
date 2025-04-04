@@ -1,7 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import { apiEndpoints } from "../data/apiData";
 
 interface SidebarItemProps {
   title: string;
@@ -52,6 +53,37 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeEndpoint, setActiveEndpoint }: SidebarProps) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredEndpoints, setFilteredEndpoints] = useState<Record<string, any>>({});
+
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setFilteredEndpoints(apiEndpoints);
+      return;
+    }
+
+    const filtered: Record<string, any> = {};
+    Object.entries(apiEndpoints).forEach(([key, endpoint]) => {
+      if (
+        endpoint.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        endpoint.method.toLowerCase().includes(searchTerm.toLowerCase())
+      ) {
+        filtered[key] = endpoint;
+      }
+    });
+    setFilteredEndpoints(filtered);
+  }, [searchTerm]);
+
+  // Group endpoints by category
+  const groupedEndpoints: Record<string, any[]> = {};
+  Object.entries(filteredEndpoints).forEach(([key, endpoint]) => {
+    const category = endpoint.category || "Other";
+    if (!groupedEndpoints[category]) {
+      groupedEndpoints[category] = [];
+    }
+    groupedEndpoints[category].push({ id: key, ...endpoint });
+  });
+
   return (
     <div className="bg-background border-r w-72 h-screen flex flex-col">
       <div className="flex items-center justify-between p-4 border-b">
@@ -71,94 +103,32 @@ export default function Sidebar({ activeEndpoint, setActiveEndpoint }: SidebarPr
             type="text"
             placeholder="Search endpoints..."
             className="w-full rounded-md bg-secondary py-2 pl-9 pr-3 text-sm"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
       
       <div className="flex-1 overflow-auto">
-        <SidebarSection title="Policy Management">
-          <SidebarItem
-            title="Get All Policies"
-            method="GET"
-            active={activeEndpoint === "get-all-policies"}
-            onClick={() => setActiveEndpoint("get-all-policies")}
-          />
-          <SidebarItem
-            title="Get Policy by ID"
-            method="GET"
-            active={activeEndpoint === "get-policy-by-id"}
-            onClick={() => setActiveEndpoint("get-policy-by-id")}
-          />
-          <SidebarItem
-            title="Create Policy"
-            method="POST"
-            active={activeEndpoint === "create-policy"}
-            onClick={() => setActiveEndpoint("create-policy")}
-          />
-          <SidebarItem
-            title="Update Policy"
-            method="PUT"
-            active={activeEndpoint === "update-policy"}
-            onClick={() => setActiveEndpoint("update-policy")}
-          />
-          <SidebarItem
-            title="Delete Policy"
-            method="DELETE"
-            active={activeEndpoint === "delete-policy"}
-            onClick={() => setActiveEndpoint("delete-policy")}
-          />
-        </SidebarSection>
-        
-        <SidebarSection title="Claims Management">
-          <SidebarItem
-            title="Get Claims Information"
-            method="GET"
-            active={activeEndpoint === "get-claims-information"}
-            onClick={() => setActiveEndpoint("get-claims-information")}
-          />
-          <SidebarItem
-            title="Update Claims Information"
-            method="PUT"
-            active={activeEndpoint === "update-claims-information"}
-            onClick={() => setActiveEndpoint("update-claims-information")}
-          />
-          <SidebarItem
-            title="Create Claims Information"
-            method="POST"
-            active={activeEndpoint === "create-claims-information"}
-            onClick={() => setActiveEndpoint("create-claims-information")}
-          />
-        </SidebarSection>
-        
-        <SidebarSection title="Premium Management">
-          <SidebarItem
-            title="Get Premium Data"
-            method="GET"
-            active={activeEndpoint === "get-premium-data"}
-            onClick={() => setActiveEndpoint("get-premium-data")}
-          />
-          <SidebarItem
-            title="Update Premium Data"
-            method="PUT"
-            active={activeEndpoint === "update-premium-data"}
-            onClick={() => setActiveEndpoint("update-premium-data")}
-          />
-          <SidebarItem
-            title="Create Premium Data"
-            method="POST"
-            active={activeEndpoint === "create-premium-data"}
-            onClick={() => setActiveEndpoint("create-premium-data")}
-          />
-        </SidebarSection>
-        
-        <SidebarSection title="Coverage Management">
-          <SidebarItem
-            title="Get Coverage Data"
-            method="GET"
-            active={activeEndpoint === "get-coverage-data"}
-            onClick={() => setActiveEndpoint("get-coverage-data")}
-          />
-        </SidebarSection>
+        {Object.keys(groupedEndpoints).length === 0 ? (
+          <div className="p-4 text-center text-muted-foreground">
+            No endpoints found
+          </div>
+        ) : (
+          Object.entries(groupedEndpoints).map(([category, endpoints]) => (
+            <SidebarSection key={category} title={category}>
+              {endpoints.map((endpoint) => (
+                <SidebarItem
+                  key={endpoint.id}
+                  title={endpoint.title}
+                  method={endpoint.method}
+                  active={activeEndpoint === endpoint.id}
+                  onClick={() => setActiveEndpoint(endpoint.id)}
+                />
+              ))}
+            </SidebarSection>
+          ))
+        )}
       </div>
     </div>
   );

@@ -19,7 +19,11 @@ const Index = () => {
     <div className="flex h-screen overflow-hidden">
       <Sidebar 
         activeEndpoint={activeEndpoint}
-        setActiveEndpoint={setActiveEndpoint}
+        setActiveEndpoint={(id) => {
+          setActiveEndpoint(id);
+          // Close API use panel when changing endpoints
+          setShowApiUsePanel(false);
+        }}
       />
       <div className="flex-1 overflow-auto">
         <ApiDocumentation

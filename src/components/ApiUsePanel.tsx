@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, ChevronDown, ChevronUp, Copy } from "lucide-react";
 
 interface ApiUsePanelProps {
   endpoint: string;
@@ -10,43 +10,152 @@ interface ApiUsePanelProps {
   onClose: () => void;
 }
 
+type ResponseStatus = null | {
+  code: number;
+  text: string;
+  time: string;
+  size: string;
+};
+
 export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }: ApiUsePanelProps) {
   const [activeTab, setActiveTab] = useState("params");
   const [response, setResponse] = useState<any>(null);
+  const [responseStatus, setResponseStatus] = useState<ResponseStatus>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResponseCollapsed, setIsResponseCollapsed] = useState(false);
+  
+  const getResponseData = () => {
+    if (endpoint.toLowerCase().includes("policy")) {
+      return {
+        "policies": [
+          {
+            "policy_id": "POL12345",
+            "first_name": "John",
+            "last_name": "Smith",
+            "email": "john.smith@example.com",
+            "phone_number": "+1 123-456-7890",
+            "start_date": "2023-01-15",
+            "end_date": "2024-01-14",
+            "policy_type": "Auto Insurance",
+            "premium_amount": 1200,
+            "coverage_amount": 50000,
+            "status": "active",
+            "created_at": "2023-01-10T14:30:45Z"
+          }
+        ],
+        "total": 100,
+        "page": 1,
+        "limit": 10
+      };
+    } else if (endpoint.toLowerCase().includes("claims")) {
+      return {
+        "claims": [
+          {
+            "claim_id": "CLM98765",
+            "policy_id": "POL12345",
+            "incident_date": "2023-05-20",
+            "filing_date": "2023-05-22",
+            "claim_type": "Collision",
+            "claim_amount": 3500,
+            "status": "pending",
+            "description": "Vehicle damage from rear-end collision"
+          }
+        ],
+        "total": 45,
+        "page": 1,
+        "limit": 10
+      };
+    } else if (endpoint.toLowerCase().includes("premium")) {
+      return {
+        "premium_records": [
+          {
+            "premium_id": "PRM56789",
+            "policy_id": "POL12345",
+            "amount": 1200,
+            "frequency": "annual",
+            "next_due_date": "2024-01-15",
+            "payment_method": "credit_card",
+            "is_autopay": true
+          }
+        ],
+        "total": 32,
+        "page": 1,
+        "limit": 10
+      };
+    } else if (endpoint.toLowerCase().includes("coverage")) {
+      return {
+        "coverage_details": [
+          {
+            "coverage_id": "COV34567",
+            "policy_id": "POL12345",
+            "coverage_type": "Comprehensive",
+            "coverage_limit": 50000,
+            "deductible": 500,
+            "is_active": true,
+            "coverage_start": "2023-01-15",
+            "coverage_end": "2024-01-14"
+          }
+        ],
+        "total": 28,
+        "page": 1,
+        "limit": 10
+      };
+    } else if (endpoint.toLowerCase().includes("employee")) {
+      return {
+        "employees": [
+          {
+            "employee_id": "EM3278",
+            "first_name": "Mark", 
+            "last_name": "Figueroa",
+            "email": "jeffreydoyle@example.net",
+            "phone_number": "001-581-896-0013x3890",
+            "hire_date": "2021-02-19",
+            "job_title": "Theme park manager",
+            "job_id": 284,
+            "gov_id": "829-01-2616",
+            "hiring_manager_id": "E001",
+            "hr_manager_id": "E009",
+            "marital_status": "single",
+            "state": "California",
+            "emergency_contact_name": "Gina Moore"
+          }
+        ],
+        "total": 87,
+        "page": 1,
+        "limit": 10
+      };
+    } else {
+      return {
+        "message": "Operation successful",
+        "status": "success",
+        "timestamp": new Date().toISOString()
+      };
+    }
+  };
   
   const handleSendRequest = () => {
     setIsLoading(true);
     
     // Simulate API call
     setTimeout(() => {
-      setResponse({
-        status: 200,
-        time: "687 ms",
-        size: "12.4 KB",
-        data: {
-          "policies": [
-            {
-              "policy_id": "POL12345",
-              "first_name": "John",
-              "last_name": "Smith",
-              "email": "john.smith@example.com",
-              "phone_number": "+1 123-456-7890",
-              "start_date": "2023-01-15",
-              "end_date": "2024-01-14",
-              "policy_type": "Auto Insurance",
-              "premium_amount": 1200,
-              "coverage_amount": 50000,
-              "status": "active"
-            }
-          ],
-          "total": 100,
-          "page": 1,
-          "limit": 10
-        }
+      const responseData = getResponseData();
+      const statusCode = Math.random() > 0.9 ? 400 : 200;
+      
+      setResponse(responseData);
+      setResponseStatus({
+        code: statusCode,
+        text: statusCode === 200 ? "OK" : "Bad Request",
+        time: `${Math.floor(Math.random() * 1000) + 100} ms`,
+        size: `${Math.floor(Math.random() * 100) + 10}.${Math.floor(Math.random() * 90) + 10} KB`
       });
       setIsLoading(false);
     }, 800);
+  };
+
+  const copyToClipboard = () => {
+    if (response) {
+      navigator.clipboard.writeText(JSON.stringify(response, null, 2));
+    }
   };
   
   return (
@@ -305,38 +414,45 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
         </div>
       </div>
       
-      {response && (
+      {responseStatus && (
         <div className="p-4 flex-1 overflow-auto">
-          <div className="mb-2">
+          <div className="flex justify-between items-center mb-2 cursor-pointer" 
+               onClick={() => setIsResponseCollapsed(!isResponseCollapsed)}>
             <h4 className="text-lg font-medium">Response</h4>
-            <div className="flex items-center space-x-2 mt-1">
-              <div className="success-badge">
-                <span className="mr-1 h-2 w-2 rounded-full bg-emerald-500 inline-block"></span>
-                <span>200 OK</span>
-              </div>
-              <span className="text-xs text-muted-foreground">{response.time}</span>
-              <span className="text-xs text-muted-foreground">{response.size}</span>
-            </div>
+            <button className="text-muted-foreground hover:text-foreground">
+              {isResponseCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+            </button>
           </div>
           
-          <div className="mt-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <h5 className="font-medium">Response Body</h5>
-                <span className="px-2 py-0.5 bg-emerald-600/20 text-emerald-500 rounded-md text-xs">API Data</span>
-              </div>
-              <button className="copy-button">Copy</button>
+          <div className="flex items-center space-x-2 mt-1">
+            <div className={`${responseStatus.code >= 200 && responseStatus.code < 300 ? 'success-badge' : 'error-badge'}`}>
+              <span className={`mr-1 h-2 w-2 rounded-full ${responseStatus.code >= 200 && responseStatus.code < 300 ? 'bg-emerald-500' : 'bg-red-500'} inline-block`}></span>
+              <span>{responseStatus.code} {responseStatus.text}</span>
             </div>
-            
-            <div className="border rounded-md max-h-80 overflow-auto">
-              <pre className="p-4 text-sm font-mono">
-                {JSON.stringify(response.data, null, 2)
-                  .replace(/"(\w+)":/g, '<span class="json-key">"$1":</span>')
-                  .replace(/"([^"]+)"(?=,|\n|\s*\})/g, '<span class="json-string">"$1"</span>')
-                  .replace(/:\s*(\d+)/g, ': <span class="json-number">$1</span>')}
-              </pre>
-            </div>
+            <span className="text-xs text-muted-foreground">{responseStatus.time}</span>
+            <span className="text-xs text-muted-foreground">{responseStatus.size}</span>
           </div>
+          
+          {!isResponseCollapsed && (
+            <div className="mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <h5 className="font-medium">Response Body</h5>
+                  <span className="px-2 py-0.5 bg-emerald-600/20 text-emerald-500 rounded-md text-xs">API Data</span>
+                </div>
+                <button className="copy-button flex items-center space-x-1" onClick={copyToClipboard}>
+                  <Copy size={14} />
+                  <span>Copy</span>
+                </button>
+              </div>
+              
+              <div className="border rounded-md max-h-80 overflow-auto">
+                <pre className="p-4 text-sm font-mono">
+                  {JSON.stringify(response, null, 2)}
+                </pre>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
