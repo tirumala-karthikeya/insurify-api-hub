@@ -1,12 +1,49 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react";
+import Sidebar from "../components/Sidebar";
+import ApiDocumentation from "../components/ApiDocumentation";
+import ApiUsePanel from "../components/ApiUsePanel";
+import { apiEndpoints } from "../data/apiData";
 
 const Index = () => {
+  const [activeEndpoint, setActiveEndpoint] = useState("get-all-policies");
+  const [showApiUsePanel, setShowApiUsePanel] = useState(false);
+
+  const currentEndpoint = apiEndpoints[activeEndpoint];
+
+  const handleUseApi = () => {
+    setShowApiUsePanel(true);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar 
+        activeEndpoint={activeEndpoint}
+        setActiveEndpoint={setActiveEndpoint}
+      />
+      <div className="flex-1 overflow-auto">
+        <ApiDocumentation
+          endpoint={currentEndpoint.title}
+          method={currentEndpoint.method}
+          title={currentEndpoint.title}
+          baseUrl={currentEndpoint.baseUrl}
+          path={currentEndpoint.path}
+          queryParams={currentEndpoint.queryParams}
+          headerParams={currentEndpoint.headerParams}
+          bodyParams={currentEndpoint.bodyParams}
+          responseExample={currentEndpoint.responseExample}
+          onUseApi={handleUseApi}
+        />
       </div>
+      {showApiUsePanel && (
+        <ApiUsePanel 
+          endpoint={currentEndpoint.title}
+          method={currentEndpoint.method}
+          baseUrl={currentEndpoint.baseUrl}
+          path={currentEndpoint.path}
+          onClose={() => setShowApiUsePanel(false)}
+        />
+      )}
     </div>
   );
 };
