@@ -1,4 +1,3 @@
-
 // API Endpoints data
 export const apiEndpoints: Record<string, any> = {
   // Applications endpoints
@@ -55,39 +54,6 @@ export const apiEndpoints: Record<string, any> = {
       "quote_details": null,
       "premium": null,
       "frequency": null
-    }
-  },
-  "get-all-applications": {
-    id: "get-all-applications",
-    category: "Applications",
-    title: "Get All Applications",
-    method: "GET",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/applications",
-    queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
-    responseExample: {
-      "applications": [
-        {
-          "application_id": "AP38211",
-          "applicant_id": "PH5533",
-          "plan_name": "Professional Shield",
-          "first_name": "Subhankar",
-          "last_name": "Ghosh",
-          "email_id": "iisubho1@gmail.com",
-          "status": "approved"
-        }
-      ],
-      "total": 100,
-      "page": 1,
-      "limit": 10
     }
   },
   "create-application": {
@@ -252,44 +218,6 @@ export const apiEndpoints: Record<string, any> = {
       ]
     }
   },
-  "get-all-insurance-plans": {
-    id: "get-all-insurance-plans",
-    category: "Insurance Plans",
-    title: "Get All Insurance Plans",
-    method: "GET",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/insurance_plans_to_riders_names",
-    queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
-    responseExample: {
-      "insurance_plans": [
-        {
-          "insurance_plan_name": "Professional Shield",
-          "available_riders": [
-            "Disability Insurance Rider",
-            "Critical Illness Rider"
-          ]
-        },
-        {
-          "insurance_plan_name": "Family Protector",
-          "available_riders": [
-            "Child Education Rider",
-            "Critical Illness Rider"
-          ]
-        }
-      ],
-      "total": 10,
-      "page": 1,
-      "limit": 10
-    }
-  },
 
   // Policies endpoints
   "get-policy-by-id": {
@@ -344,38 +272,6 @@ export const apiEndpoints: Record<string, any> = {
           "relationship": "spouse"
         }
       ]
-    }
-  },
-  "get-all-policies": {
-    id: "get-all-policies",
-    category: "Policies",
-    title: "Get All Policies",
-    method: "GET",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/policies",
-    queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
-    responseExample: {
-      "policies": [
-        {
-          "policy_id": "POL12345",
-          "policy_holder_id": "PH5533",
-          "application_id": "AP38211",
-          "policy_status": "active",
-          "first_name": "Subhankar",
-          "last_name": "Ghosh"
-        }
-      ],
-      "total": 50,
-      "page": 1,
-      "limit": 10
     }
   },
 
@@ -484,39 +380,6 @@ export const apiEndpoints: Record<string, any> = {
           "Health status"
         ]
       }
-    }
-  },
-  "get-all-quotes": {
-    id: "get-all-quotes",
-    category: "Quotes",
-    title: "Get All Quotes",
-    method: "GET",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/quotes",
-    queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
-    responseExample: {
-      "quotes": [
-        {
-          "quote_id": "QU361665",
-          "plan_name": "Professional Shield",
-          "plan_id": "TL003",
-          "age": 55,
-          "coverage_amount": 5000000,
-          "term_length": 10,
-          "monthly_premium": ["3960"]
-        }
-      ],
-      "total": 75,
-      "page": 1,
-      "limit": 10
     }
   },
   "create-quote": {
@@ -701,40 +564,6 @@ export const apiEndpoints: Record<string, any> = {
       }
     }
   },
-  "get-all-riders": {
-    id: "get-all-riders",
-    category: "Riders",
-    title: "Get All Riders",
-    method: "GET",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/riders",
-    queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
-    responseExample: {
-      "riders": [
-        {
-          "id": "CI001",
-          "name": "Critical Illness Rider",
-          "description": "Covers specified critical illnesses with a lump sum payment upon diagnosis."
-        },
-        {
-          "id": "DI001",
-          "name": "Disability Insurance Rider",
-          "description": "Provides income replacement if the insured becomes disabled and cannot work."
-        }
-      ],
-      "total": 12,
-      "page": 1,
-      "limit": 10
-    }
-  },
 
   // Riders Applications endpoints
   "get-rider-application-by-id": {
@@ -779,37 +608,6 @@ export const apiEndpoints: Record<string, any> = {
           "geographical_location": "rural"
         }
       ]
-    }
-  },
-  "get-all-rider-applications": {
-    id: "get-all-rider-applications",
-    category: "Rider Applications",
-    title: "Get All Rider Applications",
-    method: "GET",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/riders_applications",
-    queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
-    responseExample: {
-      "rider_applications": [
-        {
-          "rider_application_id": "AP38554",
-          "rider_applicant_id": "RH9207",
-          "rider_name": "Enhanced Accidental Coverage",
-          "rider_id": "RID001",
-          "status": "under review"
-        }
-      ],
-      "total": 32,
-      "page": 1,
-      "limit": 10
     }
   },
   "create-rider-application": {
@@ -932,14 +730,14 @@ export const apiEndpoints: Record<string, any> = {
     }
   },
 
-  // Riders Quote endpoints
+  // Rider Quotes endpoints
   "get-rider-quote-by-id": {
     id: "get-rider-quote-by-id",
     category: "Rider Quotes",
     title: "Get Rider Quote by ID",
     method: "GET",
     baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/riders_quote/{rider_quote_id}",
+    path: "/terminsurance/api/v1/riders_quote/{rider_name}",
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
@@ -950,7 +748,7 @@ export const apiEndpoints: Record<string, any> = {
       { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
     ],
     pathParams: [
-      { name: "rider_quote_id", type: "string", required: true, description: "Unique identifier for the rider quote", example: "QU65355" }
+      { name: "rider_name", type: "string", required: true, description: "Name of the rider", example: "Critical Illness Rider" }
     ],
     responseExample: {
       "rider_quote_id": "QU65355",
@@ -1107,7 +905,7 @@ export const apiEndpoints: Record<string, any> = {
     title: "Get Term Life Insurance Plan by ID",
     method: "GET",
     baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/term_life_insurance_plans/{plan_id}",
+    path: "/terminsurance/api/v1/term_life_insurance_plans/{name}/",
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
@@ -1118,7 +916,7 @@ export const apiEndpoints: Record<string, any> = {
       { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
     ],
     pathParams: [
-      { name: "plan_id", type: "string", required: true, description: "Unique identifier for the plan", example: "TL003" }
+      { name: "name", type: "string", required: true, description: "Name of the plan", example: "Professional Shield" }
     ],
     responseExample: {
       "id": "TL003",

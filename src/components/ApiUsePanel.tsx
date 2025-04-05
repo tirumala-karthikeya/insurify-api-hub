@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { X, ChevronDown, ChevronUp, Copy, Rocket } from "lucide-react";
+import { X, ChevronDown, ChevronUp, Copy, Rocket, GripVertical } from "lucide-react";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { ScrollArea } from "./ui/scroll-area";
 import { Button } from "./ui/button";
 import { apiEndpoints } from "../data/apiData";
 import { toast } from "sonner";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 interface ApiUsePanelProps {
   endpoint: string;
@@ -93,19 +94,29 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
   // Initialize header parameters from the currentEndpoint
   const initHeaderParams = () => {
     if (currentEndpoint && currentEndpoint.headerParams) {
-      return currentEndpoint.headerParams.map(param => ({
-        name: param.name,
-        value: param.example || "",
-        checked: true
-      }));
+      // Filter to only keep api_key and Content-Type
+      const filteredHeaders = currentEndpoint.headerParams
+        .filter(param => param.name === "api_key" || param.name === "Content-Type")
+        .map(param => ({
+          name: param.name,
+          value: param.example || "",
+          checked: true
+        }));
+      
+      // Ensure we always have at least one empty header for adding new ones
+      if (filteredHeaders.length === 0) {
+        filteredHeaders.push({ name: "", value: "", checked: true });
+      } else {
+        // Always add an empty header at the end for adding new ones
+        filteredHeaders.push({ name: "", value: "", checked: true });
+      }
+      
+      return filteredHeaders;
     }
+    
     return [
-      { name: "X-SOURCE", value: "admin", checked: true },
-      { name: "X-LANG", value: "en", checked: true },
-      { name: "Content-Type", value: "application/json", checked: true },
-      { name: "X-REQUEST-ID", value: "stacktics", checked: true },
-      { name: "X-DEVICE-ID", value: "stacktics_device", checked: true },
       { name: "api_key", value: "xpectrum_api_key_123@ai", checked: true },
+      { name: "Content-Type", value: "application/json", checked: true },
       { name: "", value: "", checked: true }
     ];
   };
@@ -562,7 +573,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
     }
     
     return (
-      <div className="py-4 px-4 ">
+      <div className="py-4 px-4">
         <div className="flex items-center space-x-2 mb-4">
           <div className={`px-2 py-1 rounded-md text-xs font-medium 
           ${responseStatus.code >= 200 && responseStatus.code < 300 
@@ -587,18 +598,72 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
             </button>
           </div>
                 
-          <div className="border rounded-md max-h-[800px] overflow-auto">
-            <pre className="p-4 text-sm font-mono bg-background">
-              {JSON.stringify(response, null, 2)}
-            </pre>
+          <div className="border rounded-md overflow-hidden">
+            <div className="flex items-center justify-center px-2 py-1 bg-secondary border-b cursor-ns-resize" id="response-resize-handle">
+              <div className="text-xs text-muted-foreground">
+                <span className="mr-2">Drag handle to resize ↕</span>
+                <GripVertical className="inline h-3 w-3" />
+              </div>
+            </div>
+            <div className="overflow-auto bg-background" id="response-content" style={{ height: "300px", maxHeight: "80vh" }}>
+              <pre className="p-4 text-sm font-mono whitespace-pre-wrap">
+                {JSON.stringify(response, null, 2)}
+              </pre>
+            </div>
           </div>
         </div>
       </div>
     );
   };
+
+  useEffect(() => {
+    // Add resizing functionality for response panel
+    const resizeHandle = document.getElementById("response-resize-handle");
+    const contentArea = document.getElementById("response-content");
+    
+    if (resizeHandle && contentArea) {
+      let startY: number;
+      let startHeight: number;
+      
+      const onMouseDown = (e: MouseEvent) => {
+        startY = e.clientY;
+        startHeight = parseInt(getComputedStyle(contentArea).height, 10);
+        
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+        
+        // Change cursor style
+        document.body.style.cursor = 'ns-resize';
+      };
+      
+      const onMouseMove = (e: MouseEvent) => {
+        const newHeight = startHeight - (e.clientY - startY);
+        if (newHeight > 100) { // Minimum height
+          contentArea.style.height = `${newHeight}px`;
+        }
+      };
+      
+      const onMouseUp = () => {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        
+        // Reset cursor style
+        document.body.style.cursor = '';
+      };
+      
+      resizeHandle.addEventListener('mousedown', onMouseDown);
+      
+      // Cleanup
+      return () => {
+        resizeHandle.removeEventListener('mousedown', onMouseDown);
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      };
+    }
+  }, [responseStatus]);
   
   return (
-    <div className="border-l h-screen w-96 flex flex-col bg-background">
+    <div className="border-l h-screen w-[500px] flex flex-col bg-background">
       <div className="border-b p-2 flex items-center justify-between bg-background">
         <div className="flex items-center space-x-2 px-2">
           <span className={`px-2 py-1 rounded-md text-xs font-medium ${
@@ -612,7 +677,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
             type="text"
             value={fullUrl}
             onChange={(e) => setFullUrl(e.target.value)}
-            className="flex-1 h-8 bg-background border rounded-md px-3 py-1 text-sm"
+            className="flex-1 h-8 bg-background border rounded-md px-3 py-1 text-sm min-w-[350px]"
           />
         </div>
         <div className="flex items-center space-x-2">
@@ -650,9 +715,9 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
           </div>
           
           {!isResponseCollapsed && (
-            <ScrollArea className="max-h-[700px]">
+            <div className="max-h-[700px] overflow-auto">
               {renderResponse()}
-            </ScrollArea>
+            </div>
           )}
         </div>
       </div>
