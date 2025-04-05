@@ -4,14 +4,14 @@ import { ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
-
-interface Parameter {
-  name: string;
-  type: string;
-  required: boolean;
-  description: string;
-  value?: string;
-}
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 
 interface ApiDocumentationProps {
   endpoint: string;
@@ -19,9 +19,9 @@ interface ApiDocumentationProps {
   title: string;
   baseUrl: string;
   path: string;
-  queryParams?: Parameter[];
-  headerParams?: Parameter[];
-  bodyParams?: Parameter[];
+  queryParams?: any[];
+  headerParams?: any[];
+  bodyParams?: any[];
   responseExample?: Record<string, any>;
   onUseApi: () => void;
   isApiPanelOpen?: boolean;
@@ -40,8 +40,6 @@ export default function ApiDocumentation({
   onUseApi,
   isApiPanelOpen = false
 }: ApiDocumentationProps) {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [responseTab, setResponseTab] = useState("schema");
   const [isResponseCollapsed, setIsResponseCollapsed] = useState(false);
   const [showResponse, setShowResponse] = useState(false);
   const [requestBody, setRequestBody] = useState(`{
@@ -63,27 +61,31 @@ export default function ApiDocumentation({
   const [activeLanguage, setActiveLanguage] = useState("curl");
   const [isCopied, setIsCopied] = useState(false);
   const [queryParamsValues, setQueryParamsValues] = useState<Record<string, string>>({});
-  const [headerParamsValues, setHeaderParamsValues] = useState<Record<string, string>>({});
+  const [headerParamsValues, setHeaderParamsValues] = useState<Record<string, string>>({
+    "X-API-KEY": "your_api_key",
+    "Content-Type": "application/json",
+    "Authorization": "Bearer token"
+  });
   const [bodyParamsValues, setBodyParamsValues] = useState<Record<string, string>>({});
 
   const responseData = {
     "employees": [
       {
-        "employee_id": "EMP003",
+        "employee_id": "EMP001",
         "first_name": "John", 
         "last_name": "Smith",
         "email": "john.smith@example.com",
         "phone_number": "+1 123-456-7890",
-        "hire_date": "2023-05-15",
-        "job_title": "Software Developer",
-        "job_id": 3,
+        "hire_date": "2019-06-15",
+        "job_title": "Senior Developer",
+        "job_id": 5,
         "hiring_manager_id": "EMP005",
         "hr_manager_id": "EMP010",
         "department": "Engineering",
         "status": "active"
       }
     ],
-    "total": 87,
+    "total": 100,
     "page": 1,
     "limit": 10
   };
@@ -112,12 +114,16 @@ export default function ApiDocumentation({
 
   const getSampleCode = (language: string) => {
     const apiUrl = `${baseUrl}${path}`;
-    const apiKey = queryParamsValues.api_key || "xpectrum_api_key_123@ai";
+    const apiKey = queryParamsValues.api_key || "your_api_key";
 
     switch (language) {
       case "curl":
         return `curl --location --request ${method} '${apiUrl}' \\
---header 'X-API-KEY: ${apiKey}' \\
+--header 'X-SOURCE: admin' \\
+--header 'X-LANG: en' \\
+--header 'X-REQUEST-ID: stacktics' \\
+--header 'X-DEVICE-ID: stacktics_device' \\
+--header 'x-api-key: ${apiKey}' \\
 --header 'Content-Type: application/json'${method === "POST" || method === "PUT" ? ` \\
 --data-raw '${requestBody}'` : ""}`;
 
@@ -363,23 +369,32 @@ ${requestBody}` : ""}`;
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
-        <div>
+    <div className="p-6 max-w-7xl mx-auto bg-background text-foreground">
+      {/* API Header Section */}
+      <div className="mb-8">
+        <div className="flex flex-col mb-2">
+          <span className="text-muted-foreground uppercase text-sm">EMPLOYEE</span>
           <div className="flex items-center gap-3">
-            <span className={`method-tab ${method.toLowerCase()}-tag`}>{method}</span>
-            <h1 className="text-2xl font-bold">{title}</h1>
+            <h1 className="text-3xl font-bold">{title}</h1>
+            <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">STABLE</span>
           </div>
-          <p className="text-muted-foreground mt-1">
-            <span className="text-blue-400">{baseUrl}</span>
-            <span>{path}</span>
-          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="status-stable">STABLE</span>
+        
+        {/* API URL Bar */}
+        <div className="flex items-center gap-2 mt-6 mb-8">
+          <div className="h-10 px-4 flex items-center justify-center rounded bg-green-600 text-white font-medium uppercase">
+            {method}
+          </div>
+          <div className="flex-1 border rounded bg-background">
+            <Input
+              type="text"
+              value={`${baseUrl}${path}`}
+              className="h-10 bg-background border-0"
+              readOnly
+            />
+          </div>
           <Button
-            variant="outline"
-            className={`use-api-btn ${isApiPanelOpen ? 'bg-secondary hover:bg-secondary/90' : ''}`}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
             onClick={onUseApi}
           >
             {isApiPanelOpen ? 'Close API' : 'Use API'}
@@ -387,354 +402,354 @@ ${requestBody}` : ""}`;
         </div>
       </div>
 
-      <div className="mb-8">
-        <div className="p-3 border rounded-md flex items-center space-x-2">
-          <span className={`method-tab ${method.toLowerCase()}-tag`}>{method}</span>
-          <Input
-            type="text"
-            value={`${baseUrl}${path}`}
-            className="flex-1 bg-background"
-            readOnly
-          />
-          <Button 
-            className="bg-primary hover:bg-primary/90 text-white" 
-            onClick={handleSendRequest}
-          >
-            Send
-          </Button>
+      {/* Request Section */}
+      <div className="mb-12">
+        <h2 className="text-2xl font-bold mb-6">Request</h2>
+        
+        {/* Query Parameters */}
+        {queryParams && queryParams.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold mb-4">Query Params</h3>
+            <Table className="border rounded-md overflow-hidden">
+              <TableHeader className="bg-secondary">
+                <TableRow>
+                  <TableHead className="w-1/4">Parameter</TableHead>
+                  <TableHead className="w-1/4">Type</TableHead>
+                  <TableHead className="w-1/4">Required</TableHead>
+                  <TableHead className="w-1/4">Value</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {queryParams.map((param, index) => (
+                  <TableRow key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
+                    <TableCell className="text-blue-400">{param.name}</TableCell>
+                    <TableCell>{param.type || 'string'}</TableCell>
+                    <TableCell>
+                      {param.required ? (
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-500 rounded text-xs">required</span>
+                      ) : (
+                        <span className="text-muted-foreground">optional</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Input 
+                        placeholder={`Example: ${param.description || param.example || ''}`}
+                        value={queryParamsValues[param.name] || ''}
+                        onChange={(e) => handleQueryParamChange(param.name, e.target.value)}
+                        className="w-full bg-background"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+        
+        {/* Header Parameters */}
+        {headerParams && headerParams.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold mb-4">Header Params</h3>
+            <div className="flex justify-end mb-2">
+              <Button variant="outline" size="sm" className="text-xs">
+                Generate Code
+              </Button>
+            </div>
+            <Table className="border rounded-md overflow-hidden">
+              <TableHeader className="bg-secondary">
+                <TableRow>
+                  <TableHead className="w-1/4">Parameter</TableHead>
+                  <TableHead className="w-1/4">Type</TableHead>
+                  <TableHead className="w-1/4">Required</TableHead>
+                  <TableHead className="w-1/4">Value</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {headerParams.map((param, index) => (
+                  <TableRow key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
+                    <TableCell className="text-blue-400">{param.name}</TableCell>
+                    <TableCell>{param.type || 'string'}</TableCell>
+                    <TableCell>
+                      {param.required ? (
+                        <span className="px-2 py-1 bg-orange-500/20 text-orange-500 rounded text-xs">required</span>
+                      ) : (
+                        <span className="text-muted-foreground">optional</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Input 
+                        value={headerParamsValues[param.name] || ''}
+                        onChange={(e) => handleHeaderParamChange(param.name, e.target.value)}
+                        className="w-full bg-background"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+        
+        {/* Body Parameters for POST, PUT, PATCH methods */}
+        {(method === "POST" || method === "PUT" || method === "PATCH") && bodyParams && bodyParams.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-xl font-semibold mb-4">Body Parameters</h3>
+            <div className="p-4 border rounded-md mb-4">
+              <Textarea
+                className="w-full min-h-[200px] p-4 font-mono text-sm bg-secondary/10"
+                value={requestBody}
+                onChange={(e) => setRequestBody(e.target.value)}
+              />
+            </div>
+          </div>
+        )}
+        
+        {/* Request Samples */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold mb-4">Request samples</h3>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'curl' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('curl')}
+            >
+              <span className="bg-gray-700 text-green-400 px-1">⌘</span>
+              <span>Shell</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'js' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('js')}
+            >
+              <span className="bg-gray-700 text-yellow-400 px-1">JS</span>
+              <span>JavaScript</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'java' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('java')}
+            >
+              <span className="bg-gray-700 text-orange-400 px-1">J</span>
+              <span>Java</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'swift' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('swift')}
+            >
+              <span className="bg-gray-700 text-red-400 px-1">S</span>
+              <span>Swift</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'go' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('go')}
+            >
+              <span className="bg-gray-700 text-blue-400 px-1">Go</span>
+              <span>Go</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'php' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('php')}
+            >
+              <span className="bg-gray-700 text-purple-400 px-1">P</span>
+              <span>PHP</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'python' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('python')}
+            >
+              <span className="bg-gray-700 text-blue-400 px-1">Py</span>
+              <span>Python</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'http' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('http')}
+            >
+              <span className="bg-gray-700 text-gray-400 px-1">{}</span>
+              <span>HTTP</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'c' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('c')}
+            >
+              <span className="bg-gray-700 text-gray-400 px-1">C</span>
+              <span>C</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'c#' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('c#')}
+            >
+              <span className="bg-gray-700 text-green-400 px-1">C#</span>
+              <span>C#</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'objc' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('objc')}
+            >
+              <span className="bg-gray-700 text-gray-400 px-1">[C]</span>
+              <span>Objective-C</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'ruby' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('ruby')}
+            >
+              <span className="bg-gray-700 text-red-400 px-1">R</span>
+              <span>Ruby</span>
+            </button>
+          </div>
+          <div className="border rounded-md overflow-hidden">
+            <div className="p-2 flex justify-between items-center bg-secondary">
+              <span className="text-sm font-medium">
+                {activeLanguage === 'curl' ? 'Shell' 
+                : activeLanguage === 'js' ? 'JavaScript' 
+                : activeLanguage === 'c#' ? 'C#' 
+                : activeLanguage === 'objc' ? 'Objective-C' 
+                : activeLanguage.charAt(0).toUpperCase() + activeLanguage.slice(1)}
+              </span>
+              <button
+                className="text-xs flex items-center gap-1 py-1 px-2 hover:bg-background/50 rounded"
+                onClick={() => copyToClipboard(getSampleCode(activeLanguage))}
+              >
+                {isCopied ? (
+                  <>
+                    <Check size={14} />
+                    <span>Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={14} />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <div className="bg-[#1E1E28] text-gray-300 p-4 overflow-auto max-h-72">
+              <pre className="text-sm font-mono">
+                {getSampleCode(activeLanguage)}
+              </pre>
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Responses Section */}
       <div className="mb-8">
-        <div className="flex space-x-1 border-b">
-          <button
-            className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
-            onClick={() => setActiveTab('overview')}
+        <h2 className="text-2xl font-bold mb-6">Responses</h2>
+        
+        <div className="border rounded-md overflow-hidden mb-6">
+          <div 
+            className="flex justify-between items-center p-3 cursor-pointer bg-secondary/80"
+            onClick={() => setIsResponseCollapsed(!isResponseCollapsed)}
           >
-            Overview
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'parameters' ? 'active' : ''}`}
-            onClick={() => setActiveTab('parameters')}
-          >
-            Parameters
-          </button>
-          {(method === "POST" || method === "PUT" || method === "PATCH") && (
-            <button
-              className={`tab-button ${activeTab === 'body' ? 'active' : ''}`}
-              onClick={() => setActiveTab('body')}
-            >
-              Request Body
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              <span className="font-medium">200</span>
+              <span className="text-muted-foreground">Success</span>
+            </div>
+            <button>
+              {isResponseCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
             </button>
-          )}
-          <button
-            className={`tab-button ${activeTab === 'responses' ? 'active' : ''}`}
-            onClick={() => setActiveTab('responses')}
-          >
-            Responses
-          </button>
-        </div>
-
-        <div className="py-6">
-          {activeTab === 'overview' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Overview</h2>
-              <p className="text-muted-foreground mb-4">
-                This endpoint allows you to {method === 'GET' ? 'retrieve' : method === 'POST' ? 'create' : method === 'PUT' ? 'update' : 'delete'} {endpoint.toLowerCase().includes('policies') ? 'insurance policies' : endpoint.toLowerCase().includes('claims') ? 'insurance claims' : endpoint.toLowerCase().includes('coverage') ? 'coverage details' : endpoint.toLowerCase().includes('premium') ? 'premium information' : 'user data'}.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Base URL</h3>
-                  <p className="text-blue-400 font-mono">{baseUrl}</p>
-                </div>
-                <div className="border rounded-md p-4">
-                  <h3 className="font-medium mb-2">Endpoint</h3>
-                  <p className="font-mono">{path}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'parameters' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Parameters</h2>
-              
-              <div className="mb-4">
-                <label className="text-sm font-medium">API Base URL:</label>
-                <Input
-                  type="text"
-                  value={baseUrl}
-                  className="w-full mt-1 bg-background border rounded-md px-3 py-2 text-sm"
-                  readOnly
-                />
+          </div>
+          
+          {!isResponseCollapsed && (
+            <div className="p-4 bg-secondary/10">
+              <div className="bg-[#1E1E28] rounded-md p-3 mb-4">
+                <span className="px-3 py-1 rounded text-xs bg-secondary/80">application/json</span>
               </div>
               
-              {queryParams.length > 0 && (
-                <div className="mb-8">
-                  <h3 className="text-lg font-medium mb-4">Query Parameters</h3>
-                  <div className="border rounded-md overflow-hidden">
-                    <table className="w-full text-sm">
-                      <thead className="bg-secondary text-left">
-                        <tr>
-                          <th className="p-3">Parameter</th>
-                          <th className="p-3">Type</th>
-                          <th className="p-3">Required</th>
-                          <th className="p-3 w-2/5">Value</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {queryParams.map((param, index) => (
-                          <tr key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
-                            <td className="p-3 text-blue-400">{param.name}</td>
-                            <td className="p-3 text-muted-foreground">{param.type}</td>
-                            <td className="p-3">
-                              {param.required ? (
-                                <span className="required-badge">required</span>
-                              ) : (
-                                <span className="text-muted-foreground">optional</span>
-                              )}
-                            </td>
-                            <td className="p-3">
-                              <Input 
-                                placeholder={`Example: ${param.description}`}
-                                value={queryParamsValues[param.name] || ''}
-                                onChange={(e) => handleQueryParamChange(param.name, e.target.value)}
-                                className="w-full bg-background"
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-              
-              {headerParams.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-medium mb-4">Header Parameters</h3>
-                  <div className="border rounded-md overflow-hidden">
-                    <table className="w-full text-sm">
-                      <thead className="bg-secondary text-left">
-                        <tr>
-                          <th className="p-3">Parameter</th>
-                          <th className="p-3">Type</th>
-                          <th className="p-3">Required</th>
-                          <th className="p-3 w-2/5">Value</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {headerParams.map((param, index) => (
-                          <tr key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
-                            <td className="p-3 text-blue-400">{param.name}</td>
-                            <td className="p-3 text-muted-foreground">{param.type}</td>
-                            <td className="p-3">
-                              {param.required ? (
-                                <span className="required-badge">required</span>
-                              ) : (
-                                <span className="text-muted-foreground">optional</span>
-                              )}
-                            </td>
-                            <td className="p-3">
-                              <Input 
-                                placeholder={`Example: ${param.description}`}
-                                value={headerParamsValues[param.name] || ''}
-                                onChange={(e) => handleHeaderParamChange(param.name, e.target.value)}
-                                className="w-full bg-background"
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'body' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Request Body</h2>
-              
-              <div className="mb-4">
-                <div className="flex mb-2">
-                  <button className="px-3 py-1 bg-secondary text-foreground rounded-l-md text-sm border-r">
-                    Form
-                  </button>
-                  <button className="px-3 py-1 bg-background text-foreground rounded-r-md text-sm">
-                    Raw
-                  </button>
-                </div>
-                
-                <div className="p-2 bg-accent/30 text-sm rounded-md mb-4">
-                  <p>Tip: Fill in the values between quotes for the fields you want to include in your request. <span className="text-primary cursor-pointer">Generate Template</span></p>
-                </div>
-                
-                <div className="border rounded-md">
-                  <Textarea
-                    className="p-4 text-sm font-mono bg-background min-h-[300px] w-full border-0 focus-visible:ring-0"
-                    value={requestBody}
-                    onChange={(e) => setRequestBody(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              {bodyParams.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-medium mb-4">Body Parameters</h3>
-                  <div className="border rounded-md overflow-hidden">
-                    <table className="w-full text-sm">
-                      <thead className="bg-secondary text-left">
-                        <tr>
-                          <th className="p-3">Parameter</th>
-                          <th className="p-3">Type</th>
-                          <th className="p-3">Required</th>
-                          <th className="p-3 w-2/5">Value</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {bodyParams.map((param, index) => (
-                          <tr key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
-                            <td className="p-3 text-blue-400">{param.name}</td>
-                            <td className="p-3 text-muted-foreground">{param.type}</td>
-                            <td className="p-3">
-                              {param.required ? (
-                                <span className="required-badge">required</span>
-                              ) : (
-                                <span className="text-muted-foreground">optional</span>
-                              )}
-                            </td>
-                            <td className="p-3">
-                              <Input 
-                                placeholder={`Example: ${param.description}`}
-                                value={bodyParamsValues[param.name] || ''}
-                                onChange={(e) => handleBodyParamChange(param.name, e.target.value)}
-                                className="w-full bg-background"
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'responses' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4">Responses</h2>
-              
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-2">Response Codes</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div className="border rounded-md overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-secondary text-left">
-                      <tr>
-                        <th className="p-3">Status</th>
-                        <th className="p-3">Description</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="p-3">
-                          <span className="success-badge">200 OK</span>
-                        </td>
-                        <td className="p-3">The request was successful.</td>
-                      </tr>
-                      <tr className="bg-secondary/30">
-                        <td className="p-3">
-                          <span className="error-badge">400 Bad Request</span>
-                        </td>
-                        <td className="p-3">The request was invalid or cannot be served.</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3">
-                          <span className="error-badge">401 Unauthorized</span>
-                        </td>
-                        <td className="p-3">Authentication failed or user doesn't have permissions.</td>
-                      </tr>
-                      <tr className="bg-secondary/30">
-                        <td className="p-3">
-                          <span className="error-badge">404 Not Found</span>
-                        </td>
-                        <td className="p-3">The requested resource could not be found.</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3">
-                          <span className="error-badge">500 Server Error</span>
-                        </td>
-                        <td className="p-3">An error occurred on the server.</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div className="p-3 bg-secondary/50 font-medium">
+                    application/json
+                  </div>
+                  <div className="h-96 overflow-auto">
+                    <Table>
+                      <TableHeader className="bg-secondary/30">
+                        <TableRow>
+                          <TableHead>Field</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Required</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="text-blue-400">employee_id</TableCell>
+                          <TableCell>string</TableCell>
+                          <TableCell>
+                            <span className="px-2 py-1 bg-orange-500/20 text-orange-500 rounded text-xs">required</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow className="bg-secondary/30">
+                          <TableCell className="text-blue-400">first_name</TableCell>
+                          <TableCell>string</TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">optional</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-blue-400">last_name</TableCell>
+                          <TableCell>string</TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">optional</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow className="bg-secondary/30">
+                          <TableCell className="text-blue-400">email</TableCell>
+                          <TableCell>string</TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">optional</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-blue-400">phone_number</TableCell>
+                          <TableCell>string</TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">optional</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow className="bg-secondary/30">
+                          <TableCell className="text-blue-400">hire_date</TableCell>
+                          <TableCell>string</TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">optional</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-blue-400">job_title</TableCell>
+                          <TableCell>string</TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">optional</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow className="bg-secondary/30">
+                          <TableCell className="text-blue-400">job_id</TableCell>
+                          <TableCell>integer</TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">optional</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="text-blue-400">department</TableCell>
+                          <TableCell>string</TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">optional</span>
+                          </TableCell>
+                        </TableRow>
+                        <TableRow className="bg-secondary/30">
+                          <TableCell className="text-blue-400">status</TableCell>
+                          <TableCell>string</TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">optional</span>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
-              </div>
-              
-              <div>
-                <div className="flex border-b mb-4">
-                  <button 
-                    className={`tab-button ${responseTab === 'schema' ? 'active' : ''}`}
-                    onClick={() => setResponseTab('schema')}
-                  >
-                    Schema
-                  </button>
-                  <button 
-                    className={`tab-button ${responseTab === 'example' ? 'active' : ''}`}
-                    onClick={() => setResponseTab('example')}
-                  >
+                
+                <div className="border rounded-md overflow-hidden">
+                  <div className="p-3 bg-secondary/50 font-medium">
                     Example
-                  </button>
-                </div>
-                
-                <div className="border rounded-md overflow-hidden">
-                  <div className="bg-secondary p-3 flex justify-between items-center">
-                    <div className="flex items-center space-x-2">
-                      <span className="success-badge">200 OK</span>
-                      <span className="text-xs text-muted-foreground">Success Response</span>
-                    </div>
-                    <button className="code-btn flex items-center space-x-1" onClick={() => copyToClipboard(JSON.stringify(responseExample, null, 2))}>
-                      <Copy size={14} />
-                      <span>Copy</span>
-                    </button>
                   </div>
-                  <div className="p-4 code-container bg-background">
-                    <pre className="text-sm">
-                      {responseTab === 'schema' ? (
-                        JSON.stringify(
-                          {
-                            "type": "object",
-                            "properties": {
-                              "employees": {
-                                "type": "array",
-                                "items": {
-                                  "type": "object",
-                                  "properties": {
-                                    "employee_id": { "type": "string" },
-                                    "first_name": { "type": "string" },
-                                    "last_name": { "type": "string" },
-                                    "email": { "type": "string" },
-                                    "phone_number": { "type": "string" },
-                                    "hire_date": { "type": "string" },
-                                    "job_title": { "type": "string" },
-                                    "job_id": { "type": "integer" }
-                                  },
-                                  "required": ["employee_id"]
-                                }
-                              },
-                              "total": { "type": "integer" },
-                              "page": { "type": "integer" },
-                              "limit": { "type": "integer" }
-                            }
-                          },
-                          null,
-                          2
-                        )
-                      ) : (
-                        JSON.stringify(responseExample, null, 2)
-                      )}
+                  <div className="h-96 overflow-auto bg-[#1E1E28] text-gray-300 p-4 font-mono text-sm">
+                    <pre>
+                      {JSON.stringify(responseData, null, 2)}
                     </pre>
                   </div>
                 </div>
@@ -742,235 +757,17 @@ ${requestBody}` : ""}`;
             </div>
           )}
         </div>
-      </div>
-
-      {showResponse && (
-        <div className="responses-container mb-8" id="response-section">
-          <div className="responses-header cursor-pointer" onClick={() => setIsResponseCollapsed(!isResponseCollapsed)}>
-            <h3 className="text-lg font-medium">Responses</h3>
-            <button>
-              {isResponseCollapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-            </button>
-          </div>
-          
-          {!isResponseCollapsed && (
-            <>
-              <div className="response-item">
-                <div className="response-status">
-                  <div className="response-code-success">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block mr-1"></span>
-                    <span>200 Success</span>
-                  </div>
-                  <span className="text-xs text-muted-foreground ml-2">154 ms</span>
-                  <span className="text-xs text-muted-foreground ml-2">26.45 KB</span>
-                </div>
-              </div>
-              
-              <div className="response-tabs border-t">
-                <button className="response-tab active">application/json</button>
-              </div>
-              
-              <div className="response-tables border-t p-4">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div className="response-table">
-                    <div className="response-table-header">
-                      <h4 className="font-medium">application/json</h4>
-                    </div>
-                    <div className="response-table-content h-96 overflow-auto">
-                      <table className="w-full text-sm">
-                        <thead className="bg-secondary/30 text-left">
-                          <tr>
-                            <th className="p-3">Field</th>
-                            <th className="p-3">Type</th>
-                            <th className="p-3">Required</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td className="p-3 text-blue-400">employee_id</td>
-                            <td className="p-3">string</td>
-                            <td className="p-3"><span className="required-badge">required</span></td>
-                          </tr>
-                          <tr className="bg-secondary/30">
-                            <td className="p-3 text-blue-400">first_name</td>
-                            <td className="p-3">string</td>
-                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
-                          </tr>
-                          <tr>
-                            <td className="p-3 text-blue-400">last_name</td>
-                            <td className="p-3">string</td>
-                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
-                          </tr>
-                          <tr className="bg-secondary/30">
-                            <td className="p-3 text-blue-400">email</td>
-                            <td className="p-3">string</td>
-                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
-                          </tr>
-                          <tr>
-                            <td className="p-3 text-blue-400">phone_number</td>
-                            <td className="p-3">string</td>
-                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
-                          </tr>
-                          <tr className="bg-secondary/30">
-                            <td className="p-3 text-blue-400">hire_date</td>
-                            <td className="p-3">string</td>
-                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
-                          </tr>
-                          <tr>
-                            <td className="p-3 text-blue-400">job_title</td>
-                            <td className="p-3">string</td>
-                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
-                          </tr>
-                          <tr className="bg-secondary/30">
-                            <td className="p-3 text-blue-400">job_id</td>
-                            <td className="p-3">integer</td>
-                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
-                          </tr>
-                          <tr>
-                            <td className="p-3 text-blue-400">department</td>
-                            <td className="p-3">string</td>
-                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
-                          </tr>
-                          <tr className="bg-secondary/30">
-                            <td className="p-3 text-blue-400">status</td>
-                            <td className="p-3">string</td>
-                            <td className="p-3"><span className="text-muted-foreground">optional</span></td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  
-                  <div className="response-table">
-                    <div className="response-table-header">
-                      <h4 className="font-medium">Example</h4>
-                    </div>
-                    <div className="response-table-content h-96 overflow-auto">
-                      <pre className="p-4 font-mono text-sm">
-                        {JSON.stringify(responseData, null, 2)}
-                      </pre>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      )}
-
-      <div className="request-samples bg-background">
-        <h2 className="text-xl font-semibold mb-4">Request samples</h2>
-        <div className="sample-tabs grid grid-cols-7 md:grid-cols-12 gap-2 mb-4">
-          <button 
-            className={`sample-tab ${activeLanguage === 'curl' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('curl')}
-          >
-            <span className="sample-icon text-green-400">⌘</span>
-            <span>Shell</span>
-          </button>
-          <button 
-            className={`sample-tab ${activeLanguage === 'js' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('js')}
-          >
-            <span className="sample-icon text-yellow-400">JS</span>
-            <span>JavaScript</span>
-          </button>
-          <button 
-            className={`sample-tab ${activeLanguage === 'java' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('java')}
-          >
-            <span className="sample-icon text-orange-400">☕</span>
-            <span>Java</span>
-          </button>
-          <button 
-            className={`sample-tab ${activeLanguage === 'swift' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('swift')}
-          >
-            <span className="sample-icon text-orange-400">🔶</span>
-            <span>Swift</span>
-          </button>
-          <button 
-            className={`sample-tab ${activeLanguage === 'go' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('go')}
-          >
-            <span className="sample-icon text-blue-400">Go</span>
-            <span>Go</span>
-          </button>
-          <button 
-            className={`sample-tab ${activeLanguage === 'php' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('php')}
-          >
-            <span className="sample-icon text-blue-400">PHP</span>
-            <span>PHP</span>
-          </button>
-          <button 
-            className={`sample-tab ${activeLanguage === 'python' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('python')}
-          >
-            <span className="sample-icon text-blue-400">🐍</span>
-            <span>Python</span>
-          </button>
-          <button 
-            className={`sample-tab ${activeLanguage === 'http' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('http')}
-          >
-            <span className="sample-icon text-blue-400">HTTP</span>
-            <span>HTTP</span>
-          </button>
-          <button 
-            className={`sample-tab ${activeLanguage === 'c' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('c')}
-          >
-            <span className="sample-icon text-blue-400">C</span>
-            <span>C</span>
-          </button>
-          <button 
-            className={`sample-tab ${activeLanguage === 'c#' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('c#')}
-          >
-            <span className="sample-icon text-green-400">C#</span>
-            <span>C#</span>
-          </button>
-          <button 
-            className={`sample-tab ${activeLanguage === 'objc' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('objc')}
-          >
-            <span className="sample-icon text-gray-400">[C]</span>
-            <span>Objective-C</span>
-          </button>
-          <button 
-            className={`sample-tab ${activeLanguage === 'ruby' ? 'bg-accent' : ''}`}
-            onClick={() => setActiveLanguage('ruby')}
-          >
-            <span className="sample-icon text-red-400">💎</span>
-            <span>Ruby</span>
-          </button>
-        </div>
         
         <div className="border rounded-md overflow-hidden">
-          <div className="bg-secondary p-3 flex justify-between items-center">
-            <span className="text-sm font-medium">{activeLanguage === 'curl' ? 'Shell' : activeLanguage === 'js' ? 'JavaScript' : activeLanguage === 'c#' ? 'C#' : activeLanguage === 'objc' ? 'Objective-C' : activeLanguage.charAt(0).toUpperCase() + activeLanguage.slice(1)}</span>
-            <button 
-              className="code-btn flex items-center space-x-1"
-              onClick={() => copyToClipboard(getSampleCode(activeLanguage))}
-            >
-              {isCopied ? (
-                <>
-                  <Check size={14} />
-                  <span>Copied</span>
-                </>
-              ) : (
-                <>
-                  <Copy size={14} />
-                  <span>Copy</span>
-                </>
-              )}
+          <div className="flex justify-between items-center p-3 cursor-pointer bg-secondary/80">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-red-500"></div>
+              <span className="font-medium">400</span>
+              <span className="text-muted-foreground">Bad Request</span>
+            </div>
+            <button>
+              <ChevronDown size={16} />
             </button>
-          </div>
-          <div className="p-4 bg-background max-h-72 overflow-auto">
-            <pre className="text-sm font-mono text-muted-foreground">
-              {getSampleCode(activeLanguage)}
-            </pre>
           </div>
         </div>
       </div>
