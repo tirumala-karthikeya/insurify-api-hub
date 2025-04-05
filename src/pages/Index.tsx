@@ -6,7 +6,7 @@ import ApiUsePanel from "../components/ApiUsePanel";
 import { apiEndpoints } from "../data/apiData";
 
 const Index = () => {
-  const [activeEndpoint, setActiveEndpoint] = useState("get-all-policies");
+  const [activeEndpoint, setActiveEndpoint] = useState("get-application-by-id");
   const [showApiUsePanel, setShowApiUsePanel] = useState(false);
 
   const currentEndpoint = apiEndpoints[activeEndpoint];
@@ -30,7 +30,7 @@ const Index = () => {
           endpoint={currentEndpoint.title}
           method={currentEndpoint.method}
           title={currentEndpoint.title}
-          baseUrl={currentEndpoint.baseUrl.replace("spectrum", "xpectrum")}
+          baseUrl={currentEndpoint.baseUrl}
           path={currentEndpoint.path}
           queryParams={currentEndpoint.queryParams}
           headerParams={currentEndpoint.headerParams}
@@ -44,7 +44,7 @@ const Index = () => {
         <ApiUsePanel 
           endpoint={currentEndpoint.title}
           method={currentEndpoint.method}
-          baseUrl={currentEndpoint.baseUrl.replace("spectrum", "xpectrum")}
+          baseUrl={currentEndpoint.baseUrl}
           path={currentEndpoint.path}
           onClose={() => setShowApiUsePanel(false)}
         />
