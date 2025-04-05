@@ -6,6 +6,7 @@ import { Textarea } from "./ui/textarea";
 import { ScrollArea } from "./ui/scroll-area";
 import { Button } from "./ui/button";
 import { apiEndpoints } from "../data/apiData";
+import { toast } from "sonner";
 
 interface ApiUsePanelProps {
   endpoint: string;
@@ -198,34 +199,74 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
     }
   };
   
-  const handleSendRequest = () => {
+  const handleSendRequest = async () => {
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      // Use the response example from the current endpoint data
-      const responseData = currentEndpoint?.responseExample || {
-        "message": "Operation successful",
-        "status": "success",
-        "timestamp": new Date().toISOString()
+    try {
+      // Prepare headers
+      const headers: Record<string, string> = {};
+      headerParams.forEach(header => {
+        if (header.checked && header.name && header.value) {
+          headers[header.name] = header.value;
+        }
+      });
+
+      const apiUrl = fullUrl.replace('%40', '@'); // Fix for encoded @ symbol
+      
+      // Create request options
+      const requestOptions: RequestInit = {
+        method: method,
+        headers: headers,
       };
+
+      // Add body for POST, PUT, PATCH methods
+      if (bodyEnabledMethods.includes(method) && requestBody) {
+        requestOptions.body = requestBody;
+      }
+
+      // Start timer for response time calculation
+      const startTime = Date.now();
       
-      const statusCode = Math.random() > 0.9 ? 400 : 200;
+      // Make actual API call
+      console.log(`Making ${method} request to: ${apiUrl}`);
+      const response = await fetch(apiUrl, requestOptions);
+      const endTime = Date.now();
+      const responseTime = endTime - startTime;
       
+      // Get response data
+      const responseData = await response.json();
+      const responseSize = new TextEncoder().encode(JSON.stringify(responseData)).length;
+      
+      // Set response and status
       setResponse(responseData);
       setResponseStatus({
-        code: statusCode,
-        text: statusCode === 200 ? "OK" : "Bad Request",
-        time: `${Math.floor(Math.random() * 3000) + 100} ms`,
-        size: `${Math.floor(Math.random() * 100) + 10}.${Math.floor(Math.random() * 90) + 10} KB`
+        code: response.status,
+        text: response.statusText || (response.status === 200 ? "OK" : "Error"),
+        time: `${responseTime} ms`,
+        size: `${(responseSize / 1024).toFixed(2)} KB`
       });
+      
+      console.log("API Response:", responseData);
+      
+    } catch (error) {
+      console.error("API request error:", error);
+      toast.error("API request failed. See console for details.");
+      setResponse({ error: "Request failed. Check console for details." });
+      setResponseStatus({
+        code: 500,
+        text: "Error",
+        time: "N/A",
+        size: "N/A"
+      });
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   const copyToClipboard = () => {
     if (response) {
       navigator.clipboard.writeText(JSON.stringify(response, null, 2));
+      toast.success("Response copied to clipboard");
     }
   };
   
@@ -234,7 +275,6 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
       { id: "params", label: `Params ${queryParams.filter(p => p.name).length > 0 ? queryParams.filter(p => p.name).length : ''}` },
       ...(showBody ? [{ id: "body", label: "Body" }] : []),
       { id: "headers", label: `Headers ${headerParams.filter(p => p.name).length > 0 ? headerParams.filter(p => p.name).length : ''}` },
-      { id: "auth", label: "Auth" }
     ];
 
     return (
@@ -253,7 +293,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
   };
 
   const renderBodyTypes = () => {
-    const types = ["none", "form-data", "x-www-form-urlencoded", "json", "xml", "raw", "binary", "GraphQL", "msgpack"];
+    const types = ["json"];
     
     return (
       <div className="flex flex-wrap mb-4">
@@ -502,16 +542,6 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
                 Add Header
               </Button>
             )}
-          </div>
-        );
-      
-      case "auth":
-        return (
-          <div className="py-4">
-            <div className="p-6 rounded-md bg-accent/10">
-              <h3 className="font-semibold mb-4">No Auth</h3>
-              <p className="text-muted-foreground">No authentication required</p>
-            </div>
           </div>
         );
       

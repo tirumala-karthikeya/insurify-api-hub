@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
 import { Input } from "./ui/input";
@@ -42,7 +41,6 @@ export default function ApiDocumentation({
   isApiPanelOpen = false
 }: ApiDocumentationProps) {
   const [isResponseCollapsed, setIsResponseCollapsed] = useState(false);
-  const [showResponse, setShowResponse] = useState(false);
   
   // Find the current endpoint in apiEndpoints to get the real example
   const currentEndpointKey = Object.keys(apiEndpoints).find(key => 
@@ -53,7 +51,11 @@ export default function ApiDocumentation({
   
   // Get proper request body example
   const getRequestBodyExample = () => {
-    if (currentEndpoint && currentEndpoint.method === "POST" || currentEndpoint?.method === "PUT") {
+    if (currentEndpoint && (currentEndpoint.method === "POST" || currentEndpoint.method === "PUT")) {
+      if (currentEndpoint.requestBodyExample) {
+        return JSON.stringify(currentEndpoint.requestBodyExample, null, 2);
+      }
+      
       // For POST or PUT methods, create a formatted example from bodyParams
       if (currentEndpoint.bodyParams && currentEndpoint.bodyParams.length > 0) {
         const exampleBody: Record<string, any> = {};
@@ -87,7 +89,6 @@ export default function ApiDocumentation({
     "Content-Type": "application/json",
     "Authorization": "Bearer token"
   });
-  const [bodyParamsValues, setBodyParamsValues] = useState<Record<string, string>>({});
 
   // Use the actual response example from the API data
   const responseData = currentEndpoint?.responseExample || {
@@ -102,20 +103,12 @@ export default function ApiDocumentation({
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handleSendRequest = () => {
-    setShowResponse(true);
-  };
-
   const handleQueryParamChange = (name: string, value: string) => {
     setQueryParamsValues(prev => ({ ...prev, [name]: value }));
   };
 
   const handleHeaderParamChange = (name: string, value: string) => {
     setHeaderParamsValues(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleBodyParamChange = (name: string, value: string) => {
-    setBodyParamsValues(prev => ({ ...prev, [name]: value }));
   };
 
   const getSampleCode = (language: string) => {
@@ -542,11 +535,6 @@ ${requestBody}` : ""}`;
         {headerParams && headerParams.length > 0 && (
           <div className="mb-8">
             <h3 className="text-xl font-semibold mb-4">Header Params</h3>
-            <div className="flex justify-end mb-2">
-              <Button variant="outline" size="sm" className="text-xs">
-                Generate Code
-              </Button>
-            </div>
             <Table className="border rounded-md overflow-hidden">
               <TableHeader className="bg-secondary">
                 <TableRow>
@@ -590,7 +578,7 @@ ${requestBody}` : ""}`;
               <Textarea
                 className="w-full min-h-[200px] p-4 font-mono text-sm bg-secondary/10"
                 value={requestBody}
-                onChange={(e) => setRequestBody(e.target.value)}
+                readOnly
               />
             </div>
           </div>
@@ -613,6 +601,13 @@ ${requestBody}` : ""}`;
             >
               <span className="bg-gray-700 text-yellow-400 px-1">JS</span>
               <span>JavaScript</span>
+            </button>
+            <button 
+              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'python' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
+              onClick={() => setActiveLanguage('python')}
+            >
+              <span className="bg-gray-700 text-blue-400 px-1">Py</span>
+              <span>Python</span>
             </button>
             <button 
               className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'java' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
@@ -641,13 +636,6 @@ ${requestBody}` : ""}`;
             >
               <span className="bg-gray-700 text-purple-400 px-1">P</span>
               <span>PHP</span>
-            </button>
-            <button 
-              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'python' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
-              onClick={() => setActiveLanguage('python')}
-            >
-              <span className="bg-gray-700 text-blue-400 px-1">Py</span>
-              <span>Python</span>
             </button>
             <button 
               className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'http' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
@@ -771,41 +759,4 @@ ${requestBody}` : ""}`;
                                 <span className="text-muted-foreground">optional</span>
                               )}
                             </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-                
-                <div className="border rounded-md overflow-hidden">
-                  <div className="p-3 bg-secondary/50 font-medium">
-                    Example
-                  </div>
-                  <div className="h-96 overflow-auto bg-[#1E1E28] text-gray-300 p-4 font-mono text-sm">
-                    <pre>
-                      {JSON.stringify(responseData, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        <div className="border rounded-md overflow-hidden">
-          <div className="flex justify-between items-center p-3 cursor-pointer bg-secondary/80">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-red-500"></div>
-              <span className="font-medium">400</span>
-              <span className="text-muted-foreground">Bad Request</span>
-            </div>
-            <button>
-              <ChevronDown size={16} />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+                          </TableRow
