@@ -1,73 +1,90 @@
-# Welcome to your Lovable project
+# Insurify API Hub
 
-## Project info
+A comprehensive API hub for insurance-related services with MongoDB integration.
 
-**URL**: https://lovable.dev/projects/ae75ebfc-3293-4a2b-83a7-9023042fa41d
+## Project Structure
 
-## How can I edit this code?
+- `src/` - React frontend code
+- `server/` - Express backend with MongoDB integration
 
-There are several ways of editing your application.
+## MongoDB Configuration
 
-**Use Lovable**
+### Option 1: Use Local MongoDB
+1. Install MongoDB locally: https://www.mongodb.com/try/download/community
+2. Use the connection string: `mongodb://localhost:27017/insurance-db`
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ae75ebfc-3293-4a2b-83a7-9023042fa41d) and start prompting.
+### Option 2: Create MongoDB Atlas Account
+1. Create a free account at MongoDB Atlas: https://www.mongodb.com/cloud/atlas/register
+2. Create a new cluster
+3. Create a database user with password
+4. Add your IP address to network access
+5. Get your connection string from Atlas:
+   ```
+   mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<dbname>?retryWrites=true&w=majority
+   ```
+6. Update the `.env` file with your connection string
 
-Changes made via Lovable will be committed automatically to this repo.
+## Setup Instructions
 
-**Use your preferred IDE**
+### Backend Setup
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Navigate to the server directory:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+cd server
+```
 
-Follow these steps:
+2. Install dependencies:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+```bash
+npm install
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3. Seed the database with sample data:
 
-# Step 3: Install the necessary dependencies.
-npm i
+```bash
+npm run seed
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. Start the server:
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The server will run on http://localhost:5000.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Frontend Setup
 
-**Use GitHub Codespaces**
+1. From the root directory, install frontend dependencies:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+npm install
+```
 
-## What technologies are used for this project?
+2. Start the frontend development server:
 
-This project is built with:
+```bash
+npm run dev
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The frontend will run on http://localhost:5173.
 
-## How can I deploy this project?
+## API Documentation
 
-Simply open [Lovable](https://lovable.dev/projects/ae75ebfc-3293-4a2b-83a7-9023042fa41d) and click on Share -> Publish.
+The API documentation is available within the application. The API requires an API key for authentication:
 
-## Can I connect a custom domain to my Lovable project?
+```
+xpectrum_api_key_123@ai
+```
 
-Yes it is!
+## Available Endpoints
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- `/terminsurance/api/v1/applications` - Manage insurance applications
+- `/terminsurance/api/v1/quotes` - Manage insurance quotes
+- `/terminsurance/api/v1/riders` - Access rider information
+- `/terminsurance/api/v1/riders_applications` - Manage rider applications
+- `/terminsurance/api/v1/riders_quote` - Manage rider quotes
+- `/terminsurance/api/v1/policies` - Access policy information
+- `/terminsurance/api/v1/term_life_insurance_plans` - Access term life insurance plan details
+- `/terminsurance/api/v1/insurance_plans_to_riders_names` - Get available riders for insurance plans

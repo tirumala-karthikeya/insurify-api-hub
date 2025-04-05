@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { X, ChevronDown, ChevronUp, Copy, Rocket } from "lucide-react";
 import { Input } from "./ui/input";
@@ -211,7 +210,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
         }
       });
 
-      const apiUrl = fullUrl.replace('%40', '@'); // Fix for encoded @ symbol
+      const apiUrl = fullUrl
       
       // Create request options
       const requestOptions: RequestInit = {
@@ -563,7 +562,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
     }
     
     return (
-      <div className="py-4 px-4">
+      <div className="py-4 px-4 ">
         <div className="flex items-center space-x-2 mb-4">
           <div className={`px-2 py-1 rounded-md text-xs font-medium 
           ${responseStatus.code >= 200 && responseStatus.code < 300 
@@ -588,7 +587,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
             </button>
           </div>
                 
-          <div className="border rounded-md max-h-96 overflow-auto">
+          <div className="border rounded-md max-h-[800px] overflow-auto">
             <pre className="p-4 text-sm font-mono bg-background">
               {JSON.stringify(response, null, 2)}
             </pre>
@@ -651,7 +650,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
           </div>
           
           {!isResponseCollapsed && (
-            <ScrollArea className="max-h-[300px]">
+            <ScrollArea className="max-h-[700px]">
               {renderResponse()}
             </ScrollArea>
           )}

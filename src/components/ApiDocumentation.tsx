@@ -41,6 +41,7 @@ export default function ApiDocumentation({
   isApiPanelOpen = false
 }: ApiDocumentationProps) {
   const [isResponseCollapsed, setIsResponseCollapsed] = useState(false);
+  const [responseFormat, setResponseFormat] = useState('json');
   
   // Find the current endpoint in apiEndpoints to get the real example
   const currentEndpointKey = Object.keys(apiEndpoints).find(key => 
@@ -59,19 +60,151 @@ export default function ApiDocumentation({
       // For POST or PUT methods, create a formatted example from bodyParams
       if (currentEndpoint.bodyParams && currentEndpoint.bodyParams.length > 0) {
         const exampleBody: Record<string, any> = {};
-        currentEndpoint.bodyParams.forEach(param => {
-          if (param.name === "application_id") exampleBody[param.name] = "AP38211";
-          else if (param.name === "applicant_id") exampleBody[param.name] = "PH5533";
-          else if (param.name === "first_name") exampleBody[param.name] = "Subhankar";
-          else if (param.name === "last_name") exampleBody[param.name] = "Ghosh";
-          else if (param.name === "email_id") exampleBody[param.name] = "iisubho1@gmail.com";
-          else if (param.name === "age") exampleBody[param.name] = 55;
-          else if (param.name === "coverage_amount") exampleBody[param.name] = 5000000;
-          else if (param.type === "string") exampleBody[param.name] = "example_value";
-          else if (param.type === "integer" || param.type === "number") exampleBody[param.name] = 0;
-          else exampleBody[param.name] = null;
-        });
-        return JSON.stringify(exampleBody, null, 2);
+        
+        // Check endpoint to provide specific examples
+        if (endpoint.includes("applications")) {
+          // Applications example
+          return JSON.stringify({
+            "application_id": "AP38211",
+            "applicant_id": "PH5533",
+            "plan_name": "Professional Shield",
+            "plan_id": "TL003",
+            "quote_id": "QU3616",
+            "first_name": "Subhankar",
+            "last_name": "Ghosh",
+            "email_id": "iisubho1@gmail.com",
+            "age": 55,
+            "coverage_amount": 5000000,
+            "quoted_monthly_premium": ["3960"],
+            "term_length": 10,
+            "application_date": "2025-01-21",
+            "application_time": "02:21:53.425121",
+            "status": "approved",
+            "riders": [
+              "{'rider_application_id': 'AP2571', 'rider_applicant_id': 'RH6196', 'rider_name': 'Disability Insurance Rider', 'rider_id': 'DI001', 'rider_quote_id': 'QU3128', 'premium': 158.4, 'frequency': 'monthly', 'application_date': '2025-01-21', 'application_time': '02:21:59.432586', 'status': 'approved', 'quote_details': [{'age': 55, 'occupation': 'others', 'income': 75000, 'benefit_percentage': 60, 'waiting_period': 12, 'health_condition': 'Good', 'geographical_location': 'rural', 'smoking_status': 'non-smoker', 'premium': 158.4, 'frequency': 'monthly'}]}"
+            ],
+            "beneficiary": {
+              "DOB": "11-30-1995",
+              "id_number": "12354",
+              "last_name": "Sar",
+              "first_name": "San",
+              "relationship": "spouse"
+            },
+            "approved_details": [
+              "{'approved_date': '2025-01-21', 'approved_time': '02:23:03', 'approved_by': 'Ramar John'}"
+            ],
+            "quote_details": null,
+            "premium": null,
+            "frequency": null
+          }, null, 2);
+        } else if (endpoint.includes("quotes")) {
+          // Quotes example
+          return JSON.stringify({
+            "quote_id": "QU361665",
+            "plan_name": "Professional Shield",
+            "plan_id": "TL003",
+            "age": 55,
+            "health_condition": "Good",
+            "smoking_status": "non-smoker",
+            "occupation": "others",
+            "coverage_amount": 5000000,
+            "term_length": 10,
+            "monthly_premium": ["3960"],
+            "plan": {
+              "id": "TL003",
+              "name": "Professional Shield",
+              "features": {
+                "policy_type": "Professional Term",
+                "grace_period": 60,
+                "tax_benefits": true,
+                "payment_methods": [
+                  "Bank Transfer",
+                  "Online Payment",
+                  "Corporate Payroll Deduction"
+                ],
+                "digital_services": {
+                  "claim_intimation": true,
+                  "policy_management": true,
+                  "professional_risk_assessment": true
+                },
+                "nomination_process": [
+                  "Online",
+                  "Branch",
+                  "Corporate Liaison"
+                ]
+              },
+              "age_range": {
+                "maximum_entry_age": 55,
+                "minimum_entry_age": 25,
+                "maximum_maturity_age": 70
+              },
+              "description": "A specialized term life insurance plan tailored for high-earning professionals",
+              "available_riders": [
+                "Disability Insurance Rider",
+                "Critical Illness Rider"
+              ]
+            }
+          }, null, 2);
+        } else if (endpoint.includes("riders_applications")) {
+          // Riders applications example
+          return JSON.stringify({
+            "rider_application_id": "AP38554",
+            "rider_applicant_id": "RH9207",
+            "rider_name": "Enhanced Accidental Coverage",
+            "rider_id": "RID001",
+            "rider_quote_id": "QU7719",
+            "premium": "27.00",
+            "frequency": "monthly",
+            "application_date": "2025-02-12",
+            "application_time": "01:21:47.242427",
+            "status": "under review",
+            "quote_details": [
+              {
+                "age": 40,
+                "health_condition": "Good",
+                "smoking_status": "non-smoker",
+                "occupation": "construction",
+                "base_policy_premium": 200,
+                "premium": 27.0,
+                "waiting_period_in_months": 12,
+                "geographical_location": "rural"
+              }
+            ]
+          }, null, 2);
+        } else if (endpoint.includes("riders_quote")) {
+          // Riders quote example
+          return JSON.stringify({
+            "rider_quote_id": "QU65355",
+            "rider_id": "CI001",
+            "rider_name": "Critical Illness Rider",
+            "details": [
+              {
+                "age": 55,
+                "health_condition": "Good",
+                "smoking_status": "non-smoker",
+                "additional_coverage": 100000,
+                "geographical_location": "rural",
+                "premium": 480.0
+              }
+            ],
+            "premium": "480.00"
+          }, null, 2);
+        } else {
+          // For other endpoints or fallback, create from parameters
+          currentEndpoint.bodyParams.forEach(param => {
+            if (param.name === "application_id") exampleBody[param.name] = "AP38211";
+            else if (param.name === "applicant_id") exampleBody[param.name] = "PH5533";
+            else if (param.name === "first_name") exampleBody[param.name] = "Subhankar";
+            else if (param.name === "last_name") exampleBody[param.name] = "Ghosh";
+            else if (param.name === "email_id") exampleBody[param.name] = "iisubho1@gmail.com";
+            else if (param.name === "age") exampleBody[param.name] = 55;
+            else if (param.name === "coverage_amount") exampleBody[param.name] = 5000000;
+            else if (param.type === "string") exampleBody[param.name] = "example_value";
+            else if (param.type === "integer" || param.type === "number") exampleBody[param.name] = 0;
+            else exampleBody[param.name] = null;
+          });
+          return JSON.stringify(exampleBody, null, 2);
+        }
       }
     }
     
@@ -91,11 +224,35 @@ export default function ApiDocumentation({
   });
 
   // Use the actual response example from the API data
-  const responseData = currentEndpoint?.responseExample || {
-    "message": "Operation successful",
-    "status": "success",
-    "timestamp": new Date().toISOString()
-  };
+  const responseData = currentEndpoint?.responseExample || (() => {
+    // Generate appropriate response examples based on endpoint
+    if (endpoint.includes("applications")) {
+      return {
+        "application_id": "AP38211",
+        "applicant_id": "PH5533",
+        "first_name": "Subhankar",
+        "last_name": "Ghosh",
+        "status": "approved"
+      };
+    } else if (endpoint.includes("quotes")) {
+      return {
+        "quote_id": "QU361665",
+        "plan_name": "Professional Shield",
+        "monthly_premium": ["3960"]
+      };
+    } else if (endpoint.includes("riders")) {
+      return {
+        "rider_id": "CI001",
+        "rider_name": "Critical Illness Rider"
+      };
+    } else {
+      return {
+        "message": "Operation successful",
+        "status": "success",
+        "timestamp": new Date().toISOString()
+      };
+    }
+  })();
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -113,7 +270,7 @@ export default function ApiDocumentation({
 
   const getSampleCode = (language: string) => {
     const apiUrl = `${baseUrl}${path}`;
-    const apiKey = queryParamsValues.api_key || "xpectrum_api_key_123@ai";
+    const apiKey = (queryParamsValues.api_key || "xpectrum_api_key_123@ai");
 
     switch (language) {
       case "curl":
@@ -257,10 +414,10 @@ curl_setopt_array($curl, [
   CURLOPT_HTTPHEADER => [
     "X-SOURCE: admin",
     "X-LANG: en",
-    "X-REQUEST-ID: stacktics",
-    "X-DEVICE-ID: stacktics_device",
-    "x-api-key: ${apiKey}",
-    "Content-Type: application/json"
+    "X-REQUEST-ID": "stacktics",
+    "X-DEVICE-ID": "stacktics_device",
+    "x-api-key": "${apiKey}",
+    "Content-Type": "application/json"
   ]${method === "POST" || method === "PUT" ? `,
   CURLOPT_POSTFIELDS => '${requestBody}'` : ""}
 ]);
@@ -422,28 +579,46 @@ ${requestBody}` : ""}`;
       Object.entries(obj).forEach(([key, value]) => {
         const fieldPath = prefix ? `${prefix}.${key}` : key;
         
-        if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
-          // Handle array of objects
-          fields.push({
-            field: fieldPath,
-            type: 'array',
-            required: false
-          });
-          extractFields(value[0], `${fieldPath}[0]`);
-        } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        // Determine if field is required
+        const isRequired = 
+          key === 'application_id' || 
+          key === 'policy_id' || 
+          key === 'quote_id' || 
+          key === 'rider_id' ||
+          key === 'rider_application_id' ||
+          key === 'rider_quote_id';
+        
+        if (Array.isArray(value)) {
+          if (value.length > 0 && typeof value[0] === 'object') {
+            // Handle array of objects
+            fields.push({
+              field: fieldPath,
+              type: 'array of objects',
+              required: isRequired
+            });
+            extractFields(value[0], `${fieldPath}[0]`);
+          } else {
+            // Handle array of primitives
+            fields.push({
+              field: fieldPath,
+              type: `array of ${value.length > 0 ? typeof value[0] : 'any'}`,
+              required: isRequired
+            });
+          }
+        } else if (typeof value === 'object' && value !== null) {
           // Handle nested object
           fields.push({
             field: fieldPath,
             type: 'object',
-            required: false
+            required: isRequired
           });
           extractFields(value, fieldPath);
         } else {
           // Handle primitive values
           fields.push({
             field: fieldPath,
-            type: Array.isArray(value) ? 'array' : typeof value,
-            required: key === 'application_id' || key === 'policy_id' || key === 'quote_id' || key === 'rider_id'
+            type: typeof value,
+            required: isRequired
           });
         }
       });
@@ -710,53 +885,39 @@ ${requestBody}` : ""}`;
 
       {/* Responses Section */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-6">Responses</h2>
-        
-        <div className="border rounded-md overflow-hidden mb-6">
-          <div 
-            className="flex justify-between items-center p-3 cursor-pointer bg-secondary/80"
-            onClick={() => setIsResponseCollapsed(!isResponseCollapsed)}
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-500"></div>
-              <span className="font-medium">200</span>
-              <span className="text-muted-foreground">Success</span>
+        <h2 className="text-2xl font-bold mb-6">Response</h2>
+        <div className="border rounded-md overflow-hidden">
+          <div className="bg-secondary p-4 flex justify-between items-center">
+            <h3 className="text-xl font-semibold">Response Body</h3>
+            <div className="flex space-x-2">
+              <Button 
+                variant={responseFormat === 'json' ? 'default' : 'outline'} 
+                size="sm" 
+                onClick={() => setResponseFormat('json')}
+              >
+                JSON
+              </Button>
+              <Button 
+                variant={responseFormat === 'text' ? 'default' : 'outline'} 
+                size="sm" 
+                onClick={() => setResponseFormat('text')}
+              >
+                Text
+              </Button>
             </div>
-            <button>
-              {isResponseCollapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
-            </button>
           </div>
-          
-          {!isResponseCollapsed && (
-            <div className="p-4 bg-secondary/10">
-              <div className="bg-[#1E1E28] rounded-md p-3 mb-4">
-                <span className="px-3 py-1 rounded text-xs bg-secondary/80">application/json</span>
-              </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="border rounded-md overflow-hidden">
-                  <div className="p-3 bg-secondary/50 font-medium">
-                    application/json
-                  </div>
-                  <div className="h-96 overflow-auto">
-                    <Table>
-                      <TableHeader className="bg-secondary/30">
-                        <TableRow>
-                          <TableHead>Field</TableHead>
-                          <TableHead>Type</TableHead>
-                          <TableHead>Required</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {getResponseFields().map((field, index) => (
-                          <TableRow key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
-                            <TableCell className="text-blue-400">{field.field}</TableCell>
-                            <TableCell>{field.type}</TableCell>
-                            <TableCell>
-                              {field.required ? (
-                                <span className="px-2 py-1 bg-orange-500/20 text-orange-500 rounded text-xs">required</span>
-                              ) : (
-                                <span className="text-muted-foreground">optional</span>
-                              )}
-                            </TableCell>
-                          </TableRow
+          <div className="p-4 max-h-[600px] overflow-auto bg-black">
+            <pre className="text-green-400 whitespace-pre-wrap break-all">
+              {responseFormat === 'json' 
+                ? JSON.stringify(responseData, null, 2) 
+                : typeof responseData === 'object' 
+                  ? JSON.stringify(responseData) 
+                  : String(responseData)
+              }
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
