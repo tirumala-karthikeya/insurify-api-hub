@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import { apiEndpoints } from "../data/apiData";
 
 interface ApiDocumentationProps {
   endpoint: string;
@@ -42,52 +43,57 @@ export default function ApiDocumentation({
 }: ApiDocumentationProps) {
   const [isResponseCollapsed, setIsResponseCollapsed] = useState(false);
   const [showResponse, setShowResponse] = useState(false);
-  const [requestBody, setRequestBody] = useState(`{
-  "employee_id": "",
-  "first_name": "",
-  "last_name": "",
-  "email": "",
-  "phone_number": "",
-  "hire_date": "",
-  "job_title": "",
-  "job_id": 0,
-  "gov_id": "",
-  "hiring_manager_id": "",
-  "hr_manager_id": "",
-  "marital_status": "",
-  "state": "",
-  "emergency_contact_name": ""
-}`);
+  
+  // Find the current endpoint in apiEndpoints to get the real example
+  const currentEndpointKey = Object.keys(apiEndpoints).find(key => 
+    apiEndpoints[key].title === endpoint && apiEndpoints[key].method === method
+  );
+  
+  const currentEndpoint = currentEndpointKey ? apiEndpoints[currentEndpointKey] : null;
+  
+  // Get proper request body example
+  const getRequestBodyExample = () => {
+    if (currentEndpoint && currentEndpoint.method === "POST" || currentEndpoint?.method === "PUT") {
+      // For POST or PUT methods, create a formatted example from bodyParams
+      if (currentEndpoint.bodyParams && currentEndpoint.bodyParams.length > 0) {
+        const exampleBody: Record<string, any> = {};
+        currentEndpoint.bodyParams.forEach(param => {
+          if (param.name === "application_id") exampleBody[param.name] = "AP38211";
+          else if (param.name === "applicant_id") exampleBody[param.name] = "PH5533";
+          else if (param.name === "first_name") exampleBody[param.name] = "Subhankar";
+          else if (param.name === "last_name") exampleBody[param.name] = "Ghosh";
+          else if (param.name === "email_id") exampleBody[param.name] = "iisubho1@gmail.com";
+          else if (param.name === "age") exampleBody[param.name] = 55;
+          else if (param.name === "coverage_amount") exampleBody[param.name] = 5000000;
+          else if (param.type === "string") exampleBody[param.name] = "example_value";
+          else if (param.type === "integer" || param.type === "number") exampleBody[param.name] = 0;
+          else exampleBody[param.name] = null;
+        });
+        return JSON.stringify(exampleBody, null, 2);
+      }
+    }
+    
+    return "{}";
+  };
+  
+  const [requestBody, setRequestBody] = useState(getRequestBodyExample());
   const [activeLanguage, setActiveLanguage] = useState("curl");
   const [isCopied, setIsCopied] = useState(false);
-  const [queryParamsValues, setQueryParamsValues] = useState<Record<string, string>>({});
+  const [queryParamsValues, setQueryParamsValues] = useState<Record<string, string>>({
+    "api_key": "xpectrum_api_key_123@ai"
+  });
   const [headerParamsValues, setHeaderParamsValues] = useState<Record<string, string>>({
-    "X-API-KEY": "your_api_key",
+    "X-API-KEY": "xpectrum_api_key_123@ai",
     "Content-Type": "application/json",
     "Authorization": "Bearer token"
   });
   const [bodyParamsValues, setBodyParamsValues] = useState<Record<string, string>>({});
 
-  const responseData = {
-    "employees": [
-      {
-        "employee_id": "EMP001",
-        "first_name": "John", 
-        "last_name": "Smith",
-        "email": "john.smith@example.com",
-        "phone_number": "+1 123-456-7890",
-        "hire_date": "2019-06-15",
-        "job_title": "Senior Developer",
-        "job_id": 5,
-        "hiring_manager_id": "EMP005",
-        "hr_manager_id": "EMP010",
-        "department": "Engineering",
-        "status": "active"
-      }
-    ],
-    "total": 100,
-    "page": 1,
-    "limit": 10
+  // Use the actual response example from the API data
+  const responseData = currentEndpoint?.responseExample || {
+    "message": "Operation successful",
+    "status": "success",
+    "timestamp": new Date().toISOString()
   };
 
   const copyToClipboard = (text: string) => {
@@ -114,7 +120,7 @@ export default function ApiDocumentation({
 
   const getSampleCode = (language: string) => {
     const apiUrl = `${baseUrl}${path}`;
-    const apiKey = queryParamsValues.api_key || "your_api_key";
+    const apiKey = queryParamsValues.api_key || "xpectrum_api_key_123@ai";
 
     switch (language) {
       case "curl":
@@ -131,7 +137,11 @@ export default function ApiDocumentation({
         return `const options = {
   method: "${method}",
   headers: {
-    "X-API-KEY": "${apiKey}",
+    "X-SOURCE": "admin",
+    "X-LANG": "en",
+    "X-REQUEST-ID": "stacktics",
+    "X-DEVICE-ID": "stacktics_device",
+    "x-api-key": "${apiKey}",
     "Content-Type": "application/json"
   }${method === "POST" || method === "PUT" ? `,
   body: JSON.stringify(${requestBody})` : ""}
@@ -147,7 +157,11 @@ fetch("${apiUrl}", options)
 
 url = "${apiUrl}"
 headers = {
-  "X-API-KEY": "${apiKey}",
+  "X-SOURCE": "admin",
+  "X-LANG": "en",
+  "X-REQUEST-ID": "stacktics",
+  "X-DEVICE-ID": "stacktics_device",
+  "x-api-key": "${apiKey}",
   "Content-Type": "application/json"
 }
 ${method === "POST" || method === "PUT" ? `payload = ${requestBody}
@@ -167,7 +181,11 @@ public class ApiRequest {
     
     HttpRequest request = HttpRequest.newBuilder()
       .uri(URI.create("${apiUrl}"))
-      .header("X-API-KEY", "${apiKey}")
+      .header("X-SOURCE", "admin")
+      .header("X-LANG", "en")
+      .header("X-REQUEST-ID", "stacktics")
+      .header("X-DEVICE-ID", "stacktics_device")
+      .header("x-api-key", "${apiKey}")
       .header("Content-Type", "application/json")${method === "POST" || method === "PUT" ? `
       .${method.toLowerCase()}(HttpRequest.BodyPublishers.ofString('${requestBody}'))` : `
       .method("${method}", HttpRequest.BodyPublishers.noBody())`}
@@ -186,7 +204,11 @@ public class ApiRequest {
 let url = URL(string: "${apiUrl}")!
 var request = URLRequest(url: url)
 request.httpMethod = "${method}"
-request.addValue("${apiKey}", forHTTPHeaderField: "X-API-KEY")
+request.addValue("admin", forHTTPHeaderField: "X-SOURCE")
+request.addValue("en", forHTTPHeaderField: "X-LANG")
+request.addValue("stacktics", forHTTPHeaderField: "X-REQUEST-ID")
+request.addValue("stacktics_device", forHTTPHeaderField: "X-DEVICE-ID")
+request.addValue("${apiKey}", forHTTPHeaderField: "x-api-key")
 request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 ${method === "POST" || method === "PUT" ? `
 let json = """
@@ -217,7 +239,11 @@ func main() {
   payload := strings.NewReader(jsonStr)
   req, _ := http.NewRequest("${method}", "${apiUrl}", payload)` : `req, _ := http.NewRequest("${method}", "${apiUrl}", nil)`}
   
-  req.Header.Add("X-API-KEY", "${apiKey}")
+  req.Header.Add("X-SOURCE", "admin")
+  req.Header.Add("X-LANG", "en")
+  req.Header.Add("X-REQUEST-ID", "stacktics")
+  req.Header.Add("X-DEVICE-ID", "stacktics_device")
+  req.Header.Add("x-api-key", "${apiKey}")
   req.Header.Add("Content-Type", "application/json")
   
   res, _ := http.DefaultClient.Do(req)
@@ -236,7 +262,11 @@ curl_setopt_array($curl, [
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_CUSTOMREQUEST => "${method}",
   CURLOPT_HTTPHEADER => [
-    "X-API-KEY: ${apiKey}",
+    "X-SOURCE: admin",
+    "X-LANG: en",
+    "X-REQUEST-ID: stacktics",
+    "X-DEVICE-ID: stacktics_device",
+    "x-api-key: ${apiKey}",
     "Content-Type: application/json"
   ]${method === "POST" || method === "PUT" ? `,
   CURLOPT_POSTFIELDS => '${requestBody}'` : ""}
@@ -260,7 +290,11 @@ class Program
   {
     using (var client = new HttpClient())
     {
-      client.DefaultRequestHeaders.Add("X-API-KEY", "${apiKey}");
+      client.DefaultRequestHeaders.Add("X-SOURCE", "admin");
+      client.DefaultRequestHeaders.Add("X-LANG", "en");
+      client.DefaultRequestHeaders.Add("X-REQUEST-ID", "stacktics");
+      client.DefaultRequestHeaders.Add("X-DEVICE-ID", "stacktics_device");
+      client.DefaultRequestHeaders.Add("x-api-key", "${apiKey}");
       
       ${method === "POST" || method === "PUT" ? `var content = new StringContent(
         @"${requestBody}",
@@ -287,7 +321,11 @@ class Program
 NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"${apiUrl}"]];
 [request setHTTPMethod:@"${method}"];
 
-[request setValue:@"${apiKey}" forHTTPHeaderField:@"X-API-KEY"];
+[request setValue:@"admin" forHTTPHeaderField:@"X-SOURCE"];
+[request setValue:@"en" forHTTPHeaderField:@"X-LANG"];
+[request setValue:@"stacktics" forHTTPHeaderField:@"X-REQUEST-ID"];
+[request setValue:@"stacktics_device" forHTTPHeaderField:@"X-DEVICE-ID"];
+[request setValue:@"${apiKey}" forHTTPHeaderField:@"x-api-key"];
 [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
 ${method === "POST" || method === "PUT" ? `
 NSString *jsonBody = @"${requestBody.replace(/"/g, '\\"')}";
@@ -315,7 +353,11 @@ http = Net::HTTP.new(uri.host, uri.port)
 http.use_ssl = true
 
 request = Net::HTTP::${method.charAt(0).toUpperCase() + method.slice(1).toLowerCase()}.new(uri.path)
-request['X-API-KEY'] = '${apiKey}'
+request['X-SOURCE'] = 'admin'
+request['X-LANG'] = 'en'
+request['X-REQUEST-ID'] = 'stacktics'
+request['X-DEVICE-ID'] = 'stacktics_device'
+request['x-api-key'] = '${apiKey}'
 request['Content-Type'] = 'application/json'
 ${method === "POST" || method === "PUT" ? `request.body = '${requestBody}'` : ""}
 
@@ -337,7 +379,11 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "${method}");
     
     struct curl_slist *headers = NULL;
-    headers = curl_slist_append(headers, "X-API-KEY: ${apiKey}");
+    headers = curl_slist_append(headers, "X-SOURCE: admin");
+    headers = curl_slist_append(headers, "X-LANG: en");
+    headers = curl_slist_append(headers, "X-REQUEST-ID: stacktics");
+    headers = curl_slist_append(headers, "X-DEVICE-ID: stacktics_device");
+    headers = curl_slist_append(headers, "x-api-key: ${apiKey}");
     headers = curl_slist_append(headers, "Content-Type: application/json");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     
@@ -357,7 +403,11 @@ int main(void)
 
       case "http":
         return `${method} ${apiUrl} HTTP/1.1
-X-API-KEY: ${apiKey}
+X-SOURCE: admin
+X-LANG: en
+X-REQUEST-ID: stacktics
+X-DEVICE-ID: stacktics_device
+x-api-key: ${apiKey}
 Content-Type: application/json
 ${method === "POST" || method === "PUT" ? `
 
@@ -368,12 +418,54 @@ ${requestBody}` : ""}`;
     }
   };
 
+  // Function to get all field properties for the response
+  const getResponseFields = () => {
+    if (!currentEndpoint || !currentEndpoint.responseExample) return [];
+    
+    const fields = [];
+    const extractFields = (obj: any, prefix = '') => {
+      if (typeof obj !== 'object' || obj === null) return;
+      
+      Object.entries(obj).forEach(([key, value]) => {
+        const fieldPath = prefix ? `${prefix}.${key}` : key;
+        
+        if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+          // Handle array of objects
+          fields.push({
+            field: fieldPath,
+            type: 'array',
+            required: false
+          });
+          extractFields(value[0], `${fieldPath}[0]`);
+        } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          // Handle nested object
+          fields.push({
+            field: fieldPath,
+            type: 'object',
+            required: false
+          });
+          extractFields(value, fieldPath);
+        } else {
+          // Handle primitive values
+          fields.push({
+            field: fieldPath,
+            type: Array.isArray(value) ? 'array' : typeof value,
+            required: key === 'application_id' || key === 'policy_id' || key === 'quote_id' || key === 'rider_id'
+          });
+        }
+      });
+    };
+    
+    extractFields(currentEndpoint.responseExample);
+    return fields;
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto bg-background text-foreground">
       {/* API Header Section */}
       <div className="mb-8">
         <div className="flex flex-col mb-2">
-          <span className="text-muted-foreground uppercase text-sm">EMPLOYEE</span>
+          <span className="text-muted-foreground uppercase text-sm">{currentEndpoint?.category || 'API'}</span>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold">{title}</h1>
             <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">STABLE</span>
@@ -478,7 +570,7 @@ ${requestBody}` : ""}`;
                     </TableCell>
                     <TableCell>
                       <Input 
-                        value={headerParamsValues[param.name] || ''}
+                        value={headerParamsValues[param.name] || param.example || ''}
                         onChange={(e) => handleHeaderParamChange(param.name, e.target.value)}
                         className="w-full bg-background"
                       />
@@ -668,76 +760,19 @@ ${requestBody}` : ""}`;
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        <TableRow>
-                          <TableCell className="text-blue-400">employee_id</TableCell>
-                          <TableCell>string</TableCell>
-                          <TableCell>
-                            <span className="px-2 py-1 bg-orange-500/20 text-orange-500 rounded text-xs">required</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow className="bg-secondary/30">
-                          <TableCell className="text-blue-400">first_name</TableCell>
-                          <TableCell>string</TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">optional</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="text-blue-400">last_name</TableCell>
-                          <TableCell>string</TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">optional</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow className="bg-secondary/30">
-                          <TableCell className="text-blue-400">email</TableCell>
-                          <TableCell>string</TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">optional</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="text-blue-400">phone_number</TableCell>
-                          <TableCell>string</TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">optional</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow className="bg-secondary/30">
-                          <TableCell className="text-blue-400">hire_date</TableCell>
-                          <TableCell>string</TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">optional</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="text-blue-400">job_title</TableCell>
-                          <TableCell>string</TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">optional</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow className="bg-secondary/30">
-                          <TableCell className="text-blue-400">job_id</TableCell>
-                          <TableCell>integer</TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">optional</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="text-blue-400">department</TableCell>
-                          <TableCell>string</TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">optional</span>
-                          </TableCell>
-                        </TableRow>
-                        <TableRow className="bg-secondary/30">
-                          <TableCell className="text-blue-400">status</TableCell>
-                          <TableCell>string</TableCell>
-                          <TableCell>
-                            <span className="text-muted-foreground">optional</span>
-                          </TableCell>
-                        </TableRow>
+                        {getResponseFields().map((field, index) => (
+                          <TableRow key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
+                            <TableCell className="text-blue-400">{field.field}</TableCell>
+                            <TableCell>{field.type}</TableCell>
+                            <TableCell>
+                              {field.required ? (
+                                <span className="px-2 py-1 bg-orange-500/20 text-orange-500 rounded text-xs">required</span>
+                              ) : (
+                                <span className="text-muted-foreground">optional</span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
                       </TableBody>
                     </Table>
                   </div>

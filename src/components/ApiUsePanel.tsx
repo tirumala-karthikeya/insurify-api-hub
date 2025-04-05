@@ -5,6 +5,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { ScrollArea } from "./ui/scroll-area";
 import { Button } from "./ui/button";
+import { apiEndpoints } from "../data/apiData";
 
 interface ApiUsePanelProps {
   endpoint: string;
@@ -34,48 +35,111 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
   const [isLoading, setIsLoading] = useState(false);
   const [isResponseCollapsed, setIsResponseCollapsed] = useState(false);
   const [bodyType, setBodyType] = useState("json");
-  const [requestBody, setRequestBody] = useState<string>(`{
-  "employee_id": "",
-  "first_name": "",
-  "last_name": "",
-  "email": "",
-  "phone_number": "",
-  "hire_date": "",
-  "job_title": "",
-  "job_id": 0,
-  "gov_id": "",
-  "hiring_manager_id": "",
-  "hr_manager_id": "",
-  "marital_status": "",
-  "state": "",
-  "emergency_contact_name": ""
-}`);
+  
+  // Find the current endpoint data
+  const currentEndpointKey = Object.keys(apiEndpoints).find(key => 
+    apiEndpoints[key].title === endpoint && apiEndpoints[key].method === method
+  );
+  const currentEndpoint = currentEndpointKey ? apiEndpoints[currentEndpointKey] : null;
+  
+  // Default request body based on selected endpoint example
+  const getDefaultRequestBody = () => {
+    if (!currentEndpoint || !currentEndpoint.responseExample) return "{}";
+    
+    if (currentEndpoint.bodyParams && currentEndpoint.bodyParams.length > 0) {
+      const exampleBody: Record<string, any> = {};
+      currentEndpoint.bodyParams.forEach(param => {
+        if (param.required) {
+          if (param.type === "string") exampleBody[param.name] = "";
+          else if (param.type === "integer" || param.type === "number") exampleBody[param.name] = 0;
+          else exampleBody[param.name] = null;
+        }
+      });
+      return JSON.stringify(exampleBody, null, 2);
+    }
+    
+    return "{}";
+  };
+
+  const [requestBody, setRequestBody] = useState<string>(getDefaultRequestBody());
 
   const [baseUrlValue, setBaseUrlValue] = useState(baseUrl);
   const [fullUrl, setFullUrl] = useState(`${baseUrl}${path}`);
   
-  const [pathParams, setPathParams] = useState<ParamType[]>([
-    { name: "store_id", value: "1", checked: true }
-  ]);
+  // Initialize path parameters from the currentEndpoint
+  const initPathParams = () => {
+    if (currentEndpoint && currentEndpoint.pathParams) {
+      return currentEndpoint.pathParams.map(param => ({
+        name: param.name,
+        value: param.example || "",
+        checked: true
+      }));
+    }
+    return [{ name: "", value: "", checked: true }];
+  };
   
-  const [queryParams, setQueryParams] = useState<ParamType[]>([
-    { name: "", value: "", checked: true }
-  ]);
+  // Initialize query parameters from the currentEndpoint
+  const initQueryParams = () => {
+    if (currentEndpoint && currentEndpoint.queryParams) {
+      return currentEndpoint.queryParams.map(param => ({
+        name: param.name,
+        value: param.example || "",
+        checked: true
+      }));
+    }
+    return [{ name: "", value: "", checked: true }];
+  };
   
-  const [headerParams, setHeaderParams] = useState<ParamType[]>([
-    { name: "X-SOURCE", value: "admin", checked: true },
-    { name: "X-LANG", value: "en", checked: true },
-    { name: "Content-Type", value: "application/json", checked: true },
-    { name: "X-REQUEST-ID", value: "stacktics", checked: true },
-    { name: "X-DEVICE-ID", value: "stacktics_device", checked: true },
-    { name: "x-api-key", value: "", checked: true },
-    { name: "", value: "", checked: true }
-  ]);
+  // Initialize header parameters from the currentEndpoint
+  const initHeaderParams = () => {
+    if (currentEndpoint && currentEndpoint.headerParams) {
+      return currentEndpoint.headerParams.map(param => ({
+        name: param.name,
+        value: param.example || "",
+        checked: true
+      }));
+    }
+    return [
+      { name: "X-SOURCE", value: "admin", checked: true },
+      { name: "X-LANG", value: "en", checked: true },
+      { name: "Content-Type", value: "application/json", checked: true },
+      { name: "X-REQUEST-ID", value: "stacktics", checked: true },
+      { name: "X-DEVICE-ID", value: "stacktics_device", checked: true },
+      { name: "api_key", value: "xpectrum_api_key_123@ai", checked: true },
+      { name: "", value: "", checked: true }
+    ];
+  };
+  
+  const [pathParams, setPathParams] = useState<ParamType[]>(initPathParams());
+  const [queryParams, setQueryParams] = useState<ParamType[]>(initQueryParams());
+  const [headerParams, setHeaderParams] = useState<ParamType[]>(initHeaderParams());
 
   useEffect(() => {
+    setPathParams(initPathParams());
+    setQueryParams(initQueryParams());
+    setHeaderParams(initHeaderParams());
+    setRequestBody(getDefaultRequestBody());
     setBaseUrlValue(baseUrl);
     setFullUrl(`${baseUrl}${path}`);
-  }, [baseUrl, path]);
+  }, [endpoint, method, baseUrl, path]);
+
+  useEffect(() => {
+    // When parameters change, update the full URL
+    let updatedPath = path;
+    pathParams.forEach(param => {
+      if (param.checked && param.name && param.value) {
+        updatedPath = updatedPath.replace(`{${param.name}}`, param.value);
+      }
+    });
+    
+    let queryString = "";
+    const activeQueryParams = queryParams.filter(param => param.checked && param.name && param.value);
+    if (activeQueryParams.length > 0) {
+      queryString = "?" + activeQueryParams.map(param => `${param.name}=${encodeURIComponent(param.value)}`).join("&");
+    }
+    
+    setFullUrl(`${baseUrlValue}${updatedPath}${queryString}`);
+  }, [pathParams, queryParams, baseUrlValue, path]);
 
   const bodyEnabledMethods = ["POST", "PUT", "PATCH"];
   const showBody = bodyEnabledMethods.includes(method);
@@ -134,120 +198,18 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
     }
   };
   
-  const getResponseData = () => {
-    if (endpoint.toLowerCase().includes("policy")) {
-      return {
-        "policies": [
-          {
-            "policy_id": "POL12345",
-            "first_name": "John",
-            "last_name": "Smith",
-            "email": "john.smith@example.com",
-            "phone_number": "+1 123-456-7890",
-            "start_date": "2023-01-15",
-            "end_date": "2024-01-14",
-            "policy_type": "Auto Insurance",
-            "premium_amount": 1200,
-            "coverage_amount": 50000,
-            "status": "active",
-            "created_at": "2023-01-10T14:30:45Z"
-          }
-        ],
-        "total": 100,
-        "page": 1,
-        "limit": 10
-      };
-    } else if (endpoint.toLowerCase().includes("claims")) {
-      return {
-        "claims": [
-          {
-            "claim_id": "CLM98765",
-            "policy_id": "POL12345",
-            "incident_date": "2023-05-20",
-            "filing_date": "2023-05-22",
-            "claim_type": "Collision",
-            "claim_amount": 3500,
-            "status": "pending",
-            "description": "Vehicle damage from rear-end collision"
-          }
-        ],
-        "total": 45,
-        "page": 1,
-        "limit": 10
-      };
-    } else if (endpoint.toLowerCase().includes("premium")) {
-      return {
-        "premium_records": [
-          {
-            "premium_id": "PRM56789",
-            "policy_id": "POL12345",
-            "amount": 1200,
-            "frequency": "annual",
-            "next_due_date": "2024-01-15",
-            "payment_method": "credit_card",
-            "is_autopay": true
-          }
-        ],
-        "total": 32,
-        "page": 1,
-        "limit": 10
-      };
-    } else if (endpoint.toLowerCase().includes("coverage")) {
-      return {
-        "coverage_details": [
-          {
-            "coverage_id": "COV34567",
-            "policy_id": "POL12345",
-            "coverage_type": "Comprehensive",
-            "coverage_limit": 50000,
-            "deductible": 500,
-            "is_active": true,
-            "coverage_start": "2023-01-15",
-            "coverage_end": "2024-01-14"
-          }
-        ],
-        "total": 28,
-        "page": 1,
-        "limit": 10
-      };
-    } else if (endpoint.toLowerCase().includes("employee")) {
-      return {
-        "employees": [
-          {
-            "employee_id": "EMP003",
-            "first_name": "John", 
-            "last_name": "Smith",
-            "email": "john.smith@example.com",
-            "phone_number": "+1 123-456-7890",
-            "hire_date": "2023-05-15",
-            "job_title": "Software Developer",
-            "job_id": 3,
-            "gov_id": "829-01-2616",
-            "hiring_manager_id": "EMP005",
-            "hr_manager_id": "EMP010",
-            "department": "Engineering",
-            "status": "active"
-          }
-        ],
-        "total": 87,
-        "page": 1,
-        "limit": 10
-      };
-    } else {
-      return {
-        "message": "Operation successful",
-        "status": "success",
-        "timestamp": new Date().toISOString()
-      };
-    }
-  };
-  
   const handleSendRequest = () => {
     setIsLoading(true);
     
     // Simulate API call
     setTimeout(() => {
-      const responseData = getResponseData();
+      // Use the response example from the current endpoint data
+      const responseData = currentEndpoint?.responseExample || {
+        "message": "Operation successful",
+        "status": "success",
+        "timestamp": new Date().toISOString()
+      };
+      
       const statusCode = Math.random() > 0.9 ? 400 : 200;
       
       setResponse(responseData);
