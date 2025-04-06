@@ -145,7 +145,8 @@ export default function ApiDocumentation({
               ]
             }
           }, null, 2);
-        } else if (endpoint.includes("riders_applications")) {
+        } 
+        else if (endpoint.includes("riders_applications")) {
           // Riders applications example
           return JSON.stringify({
             "rider_application_id": "AP38554",
@@ -533,8 +534,8 @@ int main(void)
     headers = curl_slist_append(headers, "X-LANG: en");
     headers = curl_slist_append(headers, "X-REQUEST-ID: stacktics");
     headers = curl_slist_append(headers, "X-DEVICE-ID: stacktics_device");
-    headers = curl_slist_append(headers, "x-api-key: ${apiKey}");
-    headers = curl_slist_append(headers, "Content-Type: application/json");
+    headers = curl_slist_append(headers, "x-api-key": "${apiKey}");
+    headers = curl_slist_append(headers, "Content-Type": "application/json");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     
     ${method === "POST" || method === "PUT" ? `curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "${requestBody.replace(/"/g, '\\"')}");` : ""}

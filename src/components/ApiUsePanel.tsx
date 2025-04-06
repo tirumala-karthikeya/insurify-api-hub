@@ -36,6 +36,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
   const [isLoading, setIsLoading] = useState(false);
   const [isResponseCollapsed, setIsResponseCollapsed] = useState(false);
   const [bodyType, setBodyType] = useState("json");
+  const [showExamples, setShowExamples] = useState(false);
   
   // Find the current endpoint data
   const currentEndpointKey = Object.keys(apiEndpoints).find(key => 
@@ -47,7 +48,72 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
   const getDefaultRequestBody = () => {
     if (!currentEndpoint || !currentEndpoint.responseExample) return "{}";
     
-    if (currentEndpoint.bodyParams && currentEndpoint.bodyParams.length > 0) {
+    if (endpoint.includes("applications") && method === "POST") {
+      return JSON.stringify({
+        "application_id": "AP123456",
+        "applicant_id": "PH4006",
+        "first_name": "John",
+        "last_name": "Doe",
+        "email_id": "john.doe@example.com",
+        "application_date": new Date().toISOString().split('T')[0],
+        "application_time": new Date().toTimeString().split(' ')[0],
+        "status": "pending",
+        "quote_details": {
+          "age": 40,
+          "plan_id": "TL003",
+          "premium": 1853.28,
+          "quote_id": "QT2798",
+          "frequency": "monthly",
+          "plan_name": "Elite Life Protector",
+          "apply_date": new Date().toISOString().split('T')[0],
+          "apply_time": new Date().toTimeString().split(' ')[0],
+          "term_length": 20,
+          "occupation": "engineer",
+          "smoking_status": "non-smoker",
+          "coverage_amount": 100000,
+          "health_condition": "good",
+          "tax_benefits": true,
+          "convertibility": true,
+          "medical_exam_required": true,
+          "nominee_types_allowed": [
+            "Spouse", "Children", "Parents", "Siblings"
+          ]
+        },
+        "beneficiary": {
+          "DOB": "1990-12-12",
+          "id_number": "1289",
+          "last_name": "Doe",
+          "first_name": "Jane",
+          "relationship": "spouse"
+        }
+      }, null, 2);
+    } else if (endpoint.includes("riders_applications") && method === "POST") {
+      return JSON.stringify({
+        "rider_application_id": "AP" + Math.floor(10000 + Math.random() * 90000),
+        "rider_applicant_id": "RH" + Math.floor(1000 + Math.random() * 9000),
+        "rider_name": "Enhanced Accidental Coverage",
+        "rider_id": "RID001",
+        "rider_quote_id": "QU7719",
+        "premium": "27.00",
+        "frequency": "monthly",
+        "application_date": new Date().toISOString().split('T')[0],
+        "application_time": new Date().toTimeString().split(' ')[0],
+        "status": "pending",
+        "quote_details": [
+          "{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'engineer', 'base_policy_premium': 200, 'premium': 27.0, 'waiting_period_in_months': 12, 'geographical_location': 'urban'}"
+        ]
+      }, null, 2);
+    } else if (endpoint.includes("riders_quote") && method === "POST") {
+      return JSON.stringify({
+        "rider_quote_id": "QU" + Math.floor(1000 + Math.random() * 9000),
+        "rider_id": "RID001",
+        "rider_name": "Enhanced Accidental Coverage",
+        "details": [
+          "{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'engineer', 'base_policy_premium': 200, 'premium': 27.0, 'waiting_period_in_months': 12, 'geographical_location': 'urban'}"
+        ],
+        "premium": "27.00"
+      }, null, 2);
+    } else if (currentEndpoint.bodyParams && currentEndpoint.bodyParams.length > 0) {
       const exampleBody: Record<string, any> = {};
       currentEndpoint.bodyParams.forEach(param => {
         if (param.required) {
@@ -76,6 +142,26 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
         checked: true
       }));
     }
+    
+    // Default path params based on endpoint
+    if (path.includes("{application_id}")) {
+      return [{ name: "application_id", value: "AP312666", checked: true }];
+    } else if (path.includes("{policy_id}")) {
+      return [{ name: "policy_id", value: "POL123456", checked: true }];
+    } else if (path.includes("{rider_id}")) {
+      return [{ name: "rider_id", value: "RID001", checked: true }];
+    } else if (path.includes("{rider_application_id}")) {
+      return [{ name: "rider_application_id", value: "AP50410", checked: true }];
+    } else if (path.includes("{rider_quote_id}")) {
+      return [{ name: "rider_quote_id", value: "QU7719", checked: true }];
+    } else if (path.includes("{rider_name}")) {
+      return [{ name: "rider_name", value: "Enhanced Accidental Coverage", checked: true }];
+    } else if (path.includes("{quote_id}")) {
+      return [{ name: "quote_id", value: "QT2798", checked: true }];
+    } else if (path.includes("{name}")) {
+      return [{ name: "name", value: "Elite Life Protector", checked: true }];
+    }
+    
     return [{ name: "", value: "", checked: true }];
   };
   
@@ -88,7 +174,12 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
         checked: true
       }));
     }
-    return [{ name: "", value: "", checked: true }];
+    
+    // Always include the API key query parameter for our insurance API
+    return [
+      { name: "api_key", value: "xpectrum_api_key_123@ai", checked: true },
+      { name: "", value: "", checked: true }
+    ];
   };
   
   // Initialize header parameters from the currentEndpoint
@@ -99,7 +190,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
         .filter(param => param.name === "api_key" || param.name === "Content-Type")
         .map(param => ({
           name: param.name,
-          value: param.example || "",
+          value: param.example || (param.name === "api_key" ? "xpectrum_api_key_123@ai" : ""),
           checked: true
         }));
       
@@ -114,6 +205,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
       return filteredHeaders;
     }
     
+    // Default headers for insurance API
     return [
       { name: "api_key", value: "xpectrum_api_key_123@ai", checked: true },
       { name: "Content-Type", value: "application/json", checked: true },
@@ -126,12 +218,15 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
   const [headerParams, setHeaderParams] = useState<ParamType[]>(initHeaderParams());
 
   useEffect(() => {
+    // Update base URL to use the insurance API base URL
     setPathParams(initPathParams());
     setQueryParams(initQueryParams());
     setHeaderParams(initHeaderParams());
     setRequestBody(getDefaultRequestBody());
-    setBaseUrlValue(baseUrl);
-    setFullUrl(`${baseUrl}${path}`);
+    // Use the insurance API base URL by default
+    const insuranceBaseUrl = "https://hrms-api.xpectrum-ai.com/terminsurance/api/v1";
+    setBaseUrlValue(baseUrl || insuranceBaseUrl);
+    setFullUrl(`${baseUrl || insuranceBaseUrl}${path}`);
   }, [endpoint, method, baseUrl, path]);
 
   useEffect(() => {
@@ -221,7 +316,11 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
         }
       });
 
-      const apiUrl = fullUrl
+      // Make sure the URL includes api_key parameter for the insurance API
+      let apiUrl = fullUrl;
+      if (!apiUrl.includes("api_key=") && method !== "POST" && method !== "PUT") {
+        apiUrl += apiUrl.includes("?") ? "&api_key=xpectrum_api_key_123@ai" : "?api_key=xpectrum_api_key_123@ai";
+      }
       
       // Create request options
       const requestOptions: RequestInit = {
@@ -285,6 +384,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
       { id: "params", label: `Params ${queryParams.filter(p => p.name).length > 0 ? queryParams.filter(p => p.name).length : ''}` },
       ...(showBody ? [{ id: "body", label: "Body" }] : []),
       { id: "headers", label: `Headers ${headerParams.filter(p => p.name).length > 0 ? headerParams.filter(p => p.name).length : ''}` },
+      { id: "examples", label: "Examples" },
     ];
 
     return (
@@ -320,6 +420,406 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
     );
   };
 
+  const renderApiExamples = () => {
+    // Helper function to render common headers table
+    const renderHeadersTable = () => (
+      <div className="mb-4">
+        <h4 className="text-md font-medium mb-2">Headers</h4>
+        <div className="border rounded-lg overflow-hidden mb-4">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-accent/30">
+                <th className="text-left px-3 py-2 text-sm font-medium">Name</th>
+                <th className="text-left px-3 py-2 text-sm font-medium">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-t">
+                <td className="px-3 py-2 text-sm">api_key</td>
+                <td className="px-3 py-2 text-sm">xpectrum_api_key_123@ai</td>
+              </tr>
+              <tr className="border-t">
+                <td className="px-3 py-2 text-sm">Content-Type</td>
+                <td className="px-3 py-2 text-sm">application/json</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+
+    // Detect endpoint type based on path and method
+    const endpointType = path.split("/").filter(p => p).pop()?.replace(/\{.*\}/, "") || "";
+    
+    // Applications endpoints
+    if (path.includes("/applications")) {
+      if (method === "GET") {
+        return (
+          <div className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Example GET Response</h3>
+            <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+              <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`{
+  "application_id": "AP312666",
+  "applicant_id": "PH4006",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email_id": "john.doe@example.com",
+  "application_date": "2025-02-10",
+  "application_time": "01:38:03",
+  "status": "approved",
+  "quote_details": {
+    "age": 40,
+    "plan_id": "TL003",
+    "premium": 1853.28,
+    "quote_id": "QT2798",
+    "frequency": "monthly",
+    "plan_name": "Elite Life Protector",
+    "apply_date": "2025-02-10",
+    "apply_time": "01:20:30",
+    "occupation": "firefighters",
+    "term_length": 20,
+    "tax_benefits": true,
+    "convertibility": true,
+    "smoking_status": "smoker",
+    "coverage_amount": 100000,
+    "health_condition": "good",
+    "medical_exam_required": true,
+    "nominee_types_allowed": [
+      "Spouse", "Children", "Parents", "Siblings", "Business Partner"
+    ]
+  },
+  "beneficiary": {
+    "DOB": "1990-12-12",
+    "id_number": "1289",
+    "last_name": "Smith",
+    "first_name": "Jane",
+    "relationship": "spouse"
+  },
+  "approved_details": {
+    "approved_by": "Ramar John",
+    "approved_date": "2025-02-12",
+    "approved_time": "01:35:02"
+  },
+  "riders": [
+    "{'rider_application_id': 'AP5041', 'rider_applicant_id': 'RH8521', 'rider_name': 'Enhanced Accidental Coverage', 'rider_id': 'RID001', 'rider_quote_id': 'QU7719', 'premium': 27.0, 'frequency': 'monthly', 'application_date': '2025-02-12', 'application_time': '01:22:20.209534', 'status': 'under review', 'quote_details': [{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'construction', 'base_policy_premium': 200, 'premium': 27.0, 'waiting_period_in_months': 12, 'geographical_location': 'rural'}]}"
+  ]
+}`}
+              </pre>
+            </div>
+          </div>
+        );
+      } else if (method === "POST" || method === "PUT") {
+        return (
+          <div className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Request Example</h3>
+            {renderHeadersTable()}
+            <h4 className="text-md font-medium mb-2">Body</h4>
+            <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+              <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`{
+  "application_id": "AP312666",
+  "applicant_id": "PH4006",
+  "first_name": "John",
+  "last_name": "Doe",
+  "email_id": "john.doe@example.com",
+  "application_date": "2025-02-10",
+  "application_time": "01:38:03",
+  "status": "pending",
+  "quote_details": {
+    "age": 40,
+    "plan_id": "TL003",
+    "premium": 1853.28,
+    "quote_id": "QT2798",
+    "frequency": "monthly",
+    "plan_name": "Elite Life Protector",
+    "apply_date": "2025-02-10",
+    "apply_time": "01:20:30",
+    "occupation": "firefighters",
+    "term_length": 20,
+    "tax_benefits": true,
+    "convertibility": true,
+    "smoking_status": "smoker",
+    "coverage_amount": 100000,
+    "health_condition": "good",
+    "medical_exam_required": true,
+    "nominee_types_allowed": [
+      "Spouse", "Children", "Parents", "Siblings", "Business Partner"
+    ]
+  },
+  "beneficiary": {
+    "DOB": "1990-12-12",
+    "id_number": "1289",
+    "last_name": "Smith",
+    "first_name": "Jane",
+    "relationship": "spouse"
+  }
+}`}
+              </pre>
+            </div>
+          </div>
+        );
+      }
+    }
+    
+    // Riders applications endpoints
+    else if (path.includes("/riders_applications")) {
+      if (method === "GET") {
+        return (
+          <div className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Example GET Response</h3>
+            <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+              <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`{
+  "rider_application_id": "AP3000",
+  "rider_applicant_id": "RH9207",
+  "rider_name": "Enhanced Accidental Coverage",
+  "rider_id": "RID001",
+  "rider_quote_id": "QU7719",
+  "premium": "27.00",
+  "frequency": "monthly",
+  "application_date": "2025-02-12",
+  "application_time": "01:21:47.242427",
+  "status": "under review",
+  "quote_details": [
+    "{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'construction', 'base_policy_premium': 200, 'premium': 27, 'waiting_period_in_months': 12, 'geographical_location': 'rural'}"
+  ]
+}`}
+              </pre>
+            </div>
+          </div>
+        );
+      } else if (method === "POST" || method === "PUT") {
+        return (
+          <div className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Request Example</h3>
+            {renderHeadersTable()}
+            <h4 className="text-md font-medium mb-2">Body</h4>
+            <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+              <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`{
+  "rider_application_id": "AP3000",
+  "rider_applicant_id": "RH9207",
+  "rider_name": "Enhanced Accidental Coverage",
+  "rider_id": "RID001",
+  "rider_quote_id": "QU7719",
+  "premium": "27.00",
+  "frequency": "monthly",
+  "application_date": "2025-02-12",
+  "application_time": "01:21:47.242427",
+  "status": "under review",
+  "quote_details": [
+    "{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'construction', 'base_policy_premium': 200, 'premium': 27, 'waiting_period_in_months': 12, 'geographical_location': 'rural'}"
+  ]
+}`}
+              </pre>
+            </div>
+          </div>
+        );
+      } else if (method === "DELETE") {
+        return (
+          <div className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Delete Example</h3>
+            <p className="mb-4">This endpoint deletes a rider application by ID.</p>
+            <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+              <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`// No body required for DELETE
+// Response will be 204 No Content on success`}
+              </pre>
+            </div>
+          </div>
+        );
+      }
+    }
+    
+    // Riders quote endpoints
+    else if (path.includes("/riders_quote")) {
+      if (method === "GET") {
+        return (
+          <div className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Example GET Response</h3>
+            <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+              <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`{
+  "rider_quote_id": "QU7719",
+  "rider_id": "RID001",
+  "rider_name": "Enhanced Accidental Coverage",
+  "details": [
+    "{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'construction', 'base_policy_premium': 200, 'premium': 27, 'waiting_period_in_months': 12, 'geographical_location': 'rural'}"
+  ],
+  "premium": "27.00"
+}`}
+              </pre>
+            </div>
+          </div>
+        );
+      } else if (method === "POST" || method === "PUT") {
+        return (
+          <div className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Request Example</h3>
+            {renderHeadersTable()}
+            <h4 className="text-md font-medium mb-2">Body</h4>
+            <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+              <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`{
+  "rider_quote_id": "QU7719",
+  "rider_id": "RID001",
+  "rider_name": "Enhanced Accidental Coverage",
+  "details": [
+    "{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'construction', 'base_policy_premium': 200, 'premium': 27, 'waiting_period_in_months': 12, 'geographical_location': 'rural'}"
+  ],
+  "premium": "27.00"
+}`}
+              </pre>
+            </div>
+          </div>
+        );
+      } else if (method === "DELETE") {
+        return (
+          <div className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Delete Example</h3>
+            <p className="mb-4">This endpoint deletes a rider quote by ID.</p>
+            <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+              <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`// No body required for DELETE
+// Response will be 204 No Content on success`}
+              </pre>
+            </div>
+          </div>
+        );
+      }
+    }
+    
+    // Policies endpoints
+    else if (path.includes("/policies")) {
+      if (method === "GET") {
+        return (
+          <div className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Example GET Response</h3>
+            <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+              <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`{
+  "policy_id": "POL123456",
+  "policy_holder_id": "PH4006",
+  "application_id": "AP312666",
+  "policy_status": "active",
+  "next_payment_date": "2025-03-10",
+  "first_name": "John",
+  "last_name": "Doe",
+  "plan_details": {
+    "plan_id": "TL003",
+    "plan_name": "Elite Life Protector",
+    "term_length": 20,
+    "coverage_amount": 100000
+  },
+  "policy_dates": {
+    "issue_date": "2025-02-15",
+    "effective_date": "2025-02-20",
+    "expiry_date": "2045-02-20"
+  }
+}`}
+              </pre>
+            </div>
+          </div>
+        );
+      }
+    }
+    
+    // Riders endpoints
+    else if (path.includes("/riders")) {
+      if (method === "GET") {
+        return (
+          <div className="p-4">
+            <h3 className="text-lg font-semibold mb-4">Example GET Response</h3>
+            <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+              <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`{
+  "id": "RID001",
+  "name": "Enhanced Accidental Coverage",
+  "description": [
+    "Provides additional coverage in case of accidental death",
+    "Covers disabilities caused by accidents",
+    "Includes hospital expenses for accident-related injuries"
+  ],
+  "covered_areas": {
+    "accidental_death": true,
+    "disability": true,
+    "hospital_expenses": true
+  },
+  "required_inputs": [
+    "age",
+    "health_condition",
+    "smoking_status",
+    "occupation"
+  ],
+  "typical_payout_multiplier": {
+    "min": 1.5,
+    "max": 3.0
+  }
+}`}
+              </pre>
+            </div>
+          </div>
+        );
+      }
+    }
+    
+    // Default fallback - should not happen with our improved detection
+    else {
+      return (
+        <div className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Example for {path}</h3>
+          <p className="mb-4">This {method} endpoint interacts with {path}.</p>
+          
+          {(method === "POST" || method === "PUT") && (
+            <>
+              {renderHeadersTable()}
+              <h4 className="text-md font-medium mb-2">Example Request Body</h4>
+              <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+                <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`{
+  "example_id": "ID12345",
+  "name": "Example Name",
+  "date": "${new Date().toISOString().split('T')[0]}",
+  "time": "${new Date().toTimeString().split(' ')[0]}",
+  "status": "pending",
+  "details": {
+    "field1": "value1",
+    "field2": "value2",
+    "numeric_field": 123,
+    "boolean_field": true
+  }
+}`}
+                </pre>
+              </div>
+            </>
+          )}
+          
+          <h4 className="text-md font-medium mt-4 mb-2">Example Response</h4>
+          <div className="bg-secondary/30 p-4 rounded-md overflow-hidden">
+            <pre className="text-xs overflow-x-auto whitespace-pre" style={{ maxWidth: "100%" }}>
+{`{
+  "example_id": "ID12345",
+  "name": "Example Name",
+  "date": "${new Date().toISOString().split('T')[0]}",
+  "time": "${new Date().toTimeString().split(' ')[0]}",
+  "status": "success",
+  "details": {
+    "field1": "value1",
+    "field2": "value2",
+    "numeric_field": 123,
+    "boolean_field": true
+  },
+  "response_code": 200,
+  "message": "Operation completed successfully"
+}`}
+            </pre>
+          </div>
+        </div>
+      );
+    }
+  };
+  
   const renderTabContent = () => {
     switch (activeTab) {
       case "params":
@@ -473,7 +973,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
             ) : bodyType === "json" ? (
               <div className="border rounded-md">
                 <Textarea
-                  className="p-4 text-sm font-mono bg-background min-h-[300px] w-full border-0 focus-visible:ring-0"
+                  className="p-4 text-sm font-mono bg-background min-h-[300px] w-full border-0 focus-visible:ring-0 overflow-x-auto whitespace-pre"
                   value={requestBody}
                   onChange={(e) => setRequestBody(e.target.value)}
                 />
@@ -555,6 +1055,9 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
           </div>
         );
       
+      case "examples":
+        return renderApiExamples();
+      
       default:
         return null;
     }
@@ -605,8 +1108,8 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
                 <GripVertical className="inline h-3 w-3" />
               </div>
             </div>
-            <div className="overflow-auto bg-background" id="response-content" style={{ height: "300px", maxHeight: "80vh" }}>
-              <pre className="p-4 text-sm font-mono whitespace-pre-wrap">
+            <div className="overflow-auto bg-background" id="response-content" style={{ height: "300px", maxHeight: "80vh", overflowX: "auto" }}>
+              <pre className="p-4 text-sm font-mono whitespace-pre">
                 {JSON.stringify(response, null, 2)}
               </pre>
             </div>

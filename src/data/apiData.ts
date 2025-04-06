@@ -1,5 +1,5 @@
 // API Endpoints data
-export const apiEndpoints: Record<string, any> = {
+export const apiEndpoints = {
   // Applications endpoints
   "get-application-by-id": {
     id: "get-application-by-id",
@@ -191,30 +191,44 @@ export const apiEndpoints: Record<string, any> = {
   },
 
   // Insurance Plans to Riders Names endpoints
-  "get-insurance-plan-to-riders": {
-    id: "get-insurance-plan-to-riders",
+  "get-insurance-plan-riders": {
+    id: "get-insurance-plan-riders",
     category: "Insurance Plans",
     title: "Get Insurance Plan Riders",
+    description: "Retrieve the list of riders available for a specific insurance plan",
     method: "GET",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/insurance_plans_to_riders_names/{insurance_plan_name}",
-    queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
+    path: "/terminsurance/api/v1/insurance_plans_to_riders_names/{plan_id}",
     pathParams: [
-      { name: "insurance_plan_name", type: "string", required: true, description: "Name of the insurance plan", example: "Professional Shield" }
+      {
+        name: "plan_id",
+        description: "The ID of the insurance plan",
+        example: "TL003"
+      }
+    ],
+    queryParams: [
+      {
+        name: "api_key",
+        description: "API Key for authentication",
+        required: true,
+        example: "xpectrum_api_key_123@ai"
+      }
     ],
     responseExample: {
-      "insurance_plan_name": "Professional Shield",
-      "available_riders": [
-        "Disability Insurance Rider",
-        "Critical Illness Rider"
+      "plan_id": "TL003",
+      "plan_name": "Elite Life Protector",
+      "riders": [
+        {
+          "rider_id": "RID001",
+          "rider_name": "Enhanced Accidental Coverage"
+        },
+        {
+          "rider_id": "RID002",
+          "rider_name": "Critical Illness Rider"
+        },
+        {
+          "rider_id": "RID003",
+          "rider_name": "Disability Income Rider"
+        }
       ]
     }
   },
@@ -280,165 +294,134 @@ export const apiEndpoints: Record<string, any> = {
     id: "get-quote-by-id",
     category: "Quotes",
     title: "Get Quote by ID",
+    description: "Retrieve a specific quote by its ID",
     method: "GET",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
     path: "/terminsurance/api/v1/quotes/{quote_id}",
+    pathParams: [
+      {
+        name: "quote_id",
+        description: "The ID of the quote to retrieve",
+        example: "QT123456"
+      }
+    ],
     queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
+      {
+        name: "api_key",
+        description: "API Key for authentication",
+        required: true,
+        example: "xpectrum_api_key_123@ai"
+      }
     ],
     headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
-    pathParams: [
-      { name: "quote_id", type: "string", required: true, description: "Unique identifier for the quote", example: "QU361665" }
+      {
+        name: "X-Request-ID",
+        description: "Request ID for tracing",
+        example: "req-123-456"
+      }
     ],
     responseExample: {
-      "quote_id": "QU361665",
-      "plan_name": "Professional Shield",
+      "quote_id": "QT123456",
+      "customer_id": "CUST7890",
+      "quote_date": "2025-02-10",
+      "quote_time": "14:30:45",
+      "expiry_date": "2025-03-10",
       "plan_id": "TL003",
-      "age": 55,
-      "health_condition": "Good",
-      "smoking_status": "non-smoker",
-      "occupation": "others",
-      "coverage_amount": 5000000,
-      "term_length": 10,
-      "monthly_premium": [
-        "3960"
-      ],
-      "plan": {
-        "id": "TL003",
-        "name": "Professional Shield",
-        "features": {
-          "policy_type": "Professional Term",
-          "grace_period": 60,
-          "tax_benefits": true,
-          "payment_methods": [
-            "Bank Transfer",
-            "Online Payment",
-            "Corporate Payroll Deduction"
-          ],
-          "digital_services": {
-            "claim_intimation": true,
-            "policy_management": true,
-            "professional_risk_assessment": true
-          },
-          "nomination_process": [
-            "Online",
-            "Branch",
-            "Corporate Liaison"
-          ],
-          "partial_withdrawal": false,
-          "additional_benefits": [
-            "Professional disability coverage",
-            "Critical illness protection",
-            "Global coverage"
-          ],
-          "loan_against_policy": true,
-          "nominee_types_allowed": [
-            "Spouse",
-            "Children",
-            "Business Partners"
-          ],
-          "nominee_change_allowed": true,
-          "policy_premium_payment_frequency": [
-            "Annual",
-            "Semi-Annual",
-            "Quarterly"
-          ]
-        },
-        "age_range": {
-          "maximum_entry_age": 55,
-          "minimum_entry_age": 25,
-          "maximum_maturity_age": 70
-        },
-        "description": "A specialized term life insurance plan tailored for high-earning professionals in demanding careers with substantial coverage.",
-        "term_length": [
-          10,
-          20
-        ],
-        "convertibility": false,
-        "available_riders": [
-          "Disability Insurance Rider",
-          "Critical Illness Rider"
-        ],
-        "target_professions": [
-          "Doctors",
-          "Lawyers",
-          "Engineers",
-          "Financial Professionals"
-        ],
-        "medical_exam_required": true,
-        "maximum_coverage_amount": 5000000,
-        "minimum_coverage_amount": 500000,
-        "premium_calculation_factors": [
-          "Professional credentials",
-          "Income level",
-          "Specialized occupation risks",
-          "Health status"
-        ]
-      }
+      "plan_name": "Elite Life Protector",
+      "coverage_amount": 500000,
+      "term_length": 20,
+      "premium": {
+        "amount": 125.50,
+        "frequency": "monthly"
+      },
+      "applicant_details": {
+        "first_name": "John",
+        "last_name": "Doe",
+        "age": 35,
+        "gender": "male",
+        "health_condition": "excellent",
+        "smoking_status": "non-smoker",
+        "occupation": "engineer"
+      },
+      "status": "active",
+      "selected_riders": [
+        {
+          "rider_id": "RID001",
+          "rider_name": "Enhanced Accidental Coverage",
+          "premium": 15.75
+        }
+      ]
     }
   },
   "create-quote": {
     id: "create-quote",
     category: "Quotes",
     title: "Create Quote",
+    description: "Create a new insurance quote",
     method: "POST",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
     path: "/terminsurance/api/v1/quotes/",
     queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
+      {
+        name: "api_key",
+        description: "API Key for authentication",
+        required: true,
+        example: "xpectrum_api_key_123@ai"
+      }
     ],
     headerParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" },
-      { name: "Content-Type", type: "string", required: true, description: "Content type", example: "application/json" },
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
+      {
+        name: "Content-Type",
+        description: "Media type of the request body",
+        required: true,
+        example: "application/json"
+      },
+      {
+        name: "X-Request-ID",
+        description: "Request ID for tracing",
+        example: "req-123-456"
+      }
     ],
     bodyParams: [
-      { name: "quote_id", type: "string", required: true, description: "Unique identifier for the quote" },
-      { name: "plan_name", type: "string", required: false, description: "Name of the insurance plan" },
-      { name: "plan_id", type: "string", required: false, description: "Unique identifier for the plan" },
-      { name: "age", type: "integer", required: false, description: "Age of the applicant" },
-      { name: "health_condition", type: "string", required: false, description: "Health condition of the applicant" },
-      { name: "smoking_status", type: "string", required: false, description: "Smoking status of the applicant" },
-      { name: "occupation", type: "string", required: false, description: "Occupation of the applicant" },
-      { name: "coverage_amount", type: "integer", required: false, description: "Coverage amount" },
-      { name: "term_length", type: "integer", required: false, description: "Term length" },
-      { name: "monthly_premium", type: "string", required: false, description: "Monthly premium" },
-      { name: "plan", type: "string", required: false, description: "Plan details" }
+      {
+        name: "customer_id",
+        description: "ID of the customer requesting the quote",
+        type: "string",
+        required: true
+      },
+      {
+        name: "plan_id",
+        description: "ID of the requested insurance plan",
+        type: "string",
+        required: true
+      },
+      {
+        name: "coverage_amount",
+        description: "Requested coverage amount",
+        type: "number",
+        required: true
+      },
+      {
+        name: "term_length",
+        description: "Requested term length in years",
+        type: "number",
+        required: true
+      },
+      {
+        name: "applicant_details",
+        description: "Details about the applicant",
+        type: "object",
+        required: true
+      }
     ],
     responseExample: {
-      "quote_id": "QU361665",
-      "plan_name": "Professional Shield",
-      "plan_id": "TL003",
-      "age": 55,
-      "health_condition": "Good",
-      "smoking_status": "non-smoker",
-      "occupation": "others",
-      "coverage_amount": 5000000,
-      "term_length": 10,
-      "monthly_premium": [
-        "3960"
-      ],
-      "plan": {
-        "id": "TL003",
-        "name": "Professional Shield",
-        "features": {
-          "policy_type": "Professional Term",
-          "grace_period": 60,
-          "tax_benefits": true,
-          "payment_methods": [
-            "Bank Transfer",
-            "Online Payment",
-            "Corporate Payroll Deduction"
-          ]
-        }
+      "quote_id": "QT123456",
+      "customer_id": "CUST7890",
+      "quote_date": "2025-02-10",
+      "quote_time": "14:30:45",
+      "expiry_date": "2025-03-10",
+      "status": "active",
+      "premium": {
+        "amount": 125.50,
+        "frequency": "monthly"
       }
     }
   },
@@ -446,65 +429,72 @@ export const apiEndpoints: Record<string, any> = {
     id: "update-quote",
     category: "Quotes",
     title: "Update Quote",
+    description: "Update an existing insurance quote",
     method: "PUT",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
     path: "/terminsurance/api/v1/quotes/{quote_id}",
-    queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" },
-      { name: "Content-Type", type: "string", required: true, description: "Content type", example: "application/json" },
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "quote_id", type: "string", required: true, description: "Unique identifier for the quote", example: "QU361665" }
+      {
+        name: "quote_id",
+        description: "The ID of the quote to update",
+        example: "QT123456"
+      }
+    ],
+    queryParams: [
+      {
+        name: "api_key",
+        description: "API Key for authentication",
+        required: true,
+        example: "xpectrum_api_key_123@ai"
+      }
     ],
     bodyParams: [
-      { name: "quote_id", type: "string", required: true, description: "Unique identifier for the quote" },
-      { name: "plan_name", type: "string", required: false, description: "Name of the insurance plan" },
-      { name: "plan_id", type: "string", required: false, description: "Unique identifier for the plan" },
-      { name: "age", type: "integer", required: false, description: "Age of the applicant" },
-      { name: "health_condition", type: "string", required: false, description: "Health condition of the applicant" },
-      { name: "smoking_status", type: "string", required: false, description: "Smoking status of the applicant" },
-      { name: "occupation", type: "string", required: false, description: "Occupation of the applicant" },
-      { name: "coverage_amount", type: "integer", required: false, description: "Coverage amount" },
-      { name: "term_length", type: "integer", required: false, description: "Term length" },
-      { name: "monthly_premium", type: "string", required: false, description: "Monthly premium" },
-      { name: "plan", type: "string", required: false, description: "Plan details" }
+      {
+        name: "coverage_amount",
+        description: "Updated coverage amount",
+        type: "number"
+      },
+      {
+        name: "term_length",
+        description: "Updated term length in years",
+        type: "number"
+      },
+      {
+        name: "selected_riders",
+        description: "Updated list of selected riders",
+        type: "array"
+      }
     ],
     responseExample: {
-      "quote_id": "QU361665",
-      "plan_name": "Professional Shield",
-      "age": 55,
-      "coverage_amount": 5000000
+      "quote_id": "QT123456",
+      "updated_at": "2025-02-11T10:15:30",
+      "status": "updated"
     }
   },
   "delete-quote": {
     id: "delete-quote",
     category: "Quotes",
     title: "Delete Quote",
+    description: "Delete an existing insurance quote",
     method: "DELETE",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
     path: "/terminsurance/api/v1/quotes/{quote_id}",
-    queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "quote_id", type: "string", required: true, description: "Unique identifier for the quote", example: "QU361665" }
+      {
+        name: "quote_id",
+        description: "The ID of the quote to delete",
+        example: "QT123456"
+      }
+    ],
+    queryParams: [
+      {
+        name: "api_key",
+        description: "API Key for authentication",
+        required: true,
+        example: "xpectrum_api_key_123@ai"
+      }
     ],
     responseExample: {
-      "message": "Quote deleted successfully",
-      "quote_id": "QU361665"
+      "status": "deleted",
+      "message": "Quote QT123456 has been successfully deleted"
     }
   },
 
