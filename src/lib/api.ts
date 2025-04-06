@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 
 // API Configuration
@@ -52,8 +51,8 @@ export const policiesApi = {
 
 // API helper functions for Riders
 export const ridersApi = {
-  getById: async (id: string) => {
-    const response = await api.get(`/terminsurance/api/v1/riders/${id}?api_key=${API_KEY}`);
+  getById: async (name: string) => {
+    const response = await api.get(`/terminsurance/api/v1/riders/${name}?api_key=${API_KEY}`);
     return response.data;
   }
 };
@@ -105,11 +104,11 @@ export const ridersQuoteApi = {
 // API helper functions for Term Life Insurance Plans
 export const termLifePlansApi = {
   getAll: async () => {
-    const response = await api.get(`/terminsurance/api/v1/term_life_insurance_plans?api_key=${API_KEY}`);
+    const response = await api.get(`/terminsurance/api/v1/term_life_plans?api_key=${API_KEY}`);
     return response.data;
   },
   getById: async (id: string) => {
-    const response = await api.get(`/terminsurance/api/v1/term_life_insurance_plans/${id}?api_key=${API_KEY}`);
+    const response = await api.get(`/terminsurance/api/v1/term_life_plans/${id}?api_key=${API_KEY}`);
     return response.data;
   }
 };

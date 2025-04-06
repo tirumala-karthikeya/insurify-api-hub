@@ -86,5 +86,5 @@ xpectrum_api_key_123@ai
 - `/terminsurance/api/v1/riders_applications` - Manage rider applications
 - `/terminsurance/api/v1/riders_quote` - Manage rider quotes
 - `/terminsurance/api/v1/policies` - Access policy information
-- `/terminsurance/api/v1/term_life_insurance_plans` - Access term life insurance plan details
+- `/terminsurance/api/v1/term_life_plans` - Access term life insurance plan details
 - `/terminsurance/api/v1/insurance_plans_to_riders_names` - Get available riders for insurance plans

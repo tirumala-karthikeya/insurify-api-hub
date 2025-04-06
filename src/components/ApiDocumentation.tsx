@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
 import { Input } from "./ui/input";
@@ -169,11 +168,6 @@ export default function ApiDocumentation({
   const [queryParamsValues, setQueryParamsValues] = useState<Record<string, string>>({
     "api_key": "xpectrum_api_key_123@ai"
   });
-  const [headerParamsValues, setHeaderParamsValues] = useState<Record<string, string>>({
-    "X-API-KEY": "xpectrum_api_key_123@ai",
-    "Content-Type": "application/json",
-    "Authorization": "Bearer token"
-  });
 
   // Use the actual response example from the API data
   const responseData = currentEndpoint?.responseExample || (() => {
@@ -218,34 +212,21 @@ export default function ApiDocumentation({
     setQueryParamsValues(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleHeaderParamChange = (name: string, value: string) => {
-    setHeaderParamsValues(prev => ({ ...prev, [name]: value }));
-  };
-
   const getSampleCode = (language: string) => {
     const apiUrl = `${baseUrl}${path}`;
     const apiKey = encodeURIComponent(queryParamsValues.api_key || "xpectrum_api_key_123@ai");
-    const encodedUrl = apiUrl.replace("{", "%7B").replace("}", "%7D");
-
+    
     switch (language) {
       case "curl":
         return `curl --location --request ${method} '${apiUrl}' \\
---header 'X-SOURCE: admin' \\
---header 'X-LANG: en' \\
---header 'X-REQUEST-ID: stacktics' \\
---header 'X-DEVICE-ID: stacktics_device' \\
---header 'x-api-key: ${apiKey}' \\
---header 'Content-Type: application/json'${method === "POST" || method === "PUT" ? ` \\
+--header 'Content-Type: application/json' \\
+--header 'x-api-key: ${apiKey}'${method === "POST" || method === "PUT" ? ` \\
 --data-raw '${requestBody}'` : ""}`;
 
       case "js":
         return `const options = {
   method: "${method}",
   headers: {
-    "X-SOURCE": "admin",
-    "X-LANG": "en",
-    "X-REQUEST-ID": "stacktics",
-    "X-DEVICE-ID": "stacktics_device",
     "x-api-key": "${apiKey}",
     "Content-Type": "application/json"
   }${method === "POST" || method === "PUT" ? `,
@@ -262,10 +243,6 @@ fetch("${apiUrl}", options)
 
 url = "${apiUrl}"
 headers = {
-  "X-SOURCE": "admin",
-  "X-LANG": "en",
-  "X-REQUEST-ID": "stacktics",
-  "X-DEVICE-ID": "stacktics_device",
   "x-api-key": "${apiKey}",
   "Content-Type": "application/json"
 }
@@ -286,10 +263,6 @@ public class ApiRequest {
     
     HttpRequest request = HttpRequest.newBuilder()
       .uri(URI.create("${apiUrl}"))
-      .header("X-SOURCE", "admin")
-      .header("X-LANG", "en")
-      .header("X-REQUEST-ID", "stacktics")
-      .header("X-DEVICE-ID", "stacktics_device")
       .header("x-api-key", "${apiKey}")
       .header("Content-Type", "application/json")${method === "POST" || method === "PUT" ? `
       .${method.toLowerCase()}(HttpRequest.BodyPublishers.ofString('${requestBody}'))` : `
@@ -308,68 +281,91 @@ public class ApiRequest {
     }
   };
 
-  // Function to get all field properties for the response
-  const getResponseFields = () => {
-    if (!currentEndpoint || !currentEndpoint.responseExample) return [];
+  // Function to render example IDs for the selected endpoint
+  const renderExampleIdsTable = () => {
+    if (!currentEndpoint || !currentEndpoint.pathParams || currentEndpoint.pathParams.length === 0) {
+      return null;
+    }
+
+    const pathParam = currentEndpoint.pathParams[0];
     
-    const fields = [];
-    const extractFields = (obj: any, prefix = '') => {
-      if (typeof obj !== 'object' || obj === null) return;
+    if (!pathParam.examples || pathParam.examples.length === 0) {
+      return null;
+    }
+
+    // Define mappings for rider quote IDs and term life plan IDs
+    const idToNameMap: Record<string, string> = {
+      // Rider quotes
+      "QU7719": "Enhanced Accidental Coverage",
+      "QU2225": "Comprehensive Critical Illness", 
+      "QU2031": "Premium Waiver Protection",
+      "QU1130": "Premium Waiver Protection",
       
-      Object.entries(obj).forEach(([key, value]) => {
-        const fieldPath = prefix ? `${prefix}.${key}` : key;
-        
-        // Determine if field is required
-        const isRequired = 
-          key === 'application_id' || 
-          key === 'policy_id' || 
-          key === 'quote_id' || 
-          key === 'rider_id' ||
-          key === 'rider_application_id' ||
-          key === 'rider_quote_id';
-        
-        if (Array.isArray(value)) {
-          if (value.length > 0 && typeof value[0] === 'object') {
-            // Handle array of objects
-            fields.push({
-              field: fieldPath,
-              type: 'array of objects',
-              required: isRequired
-            });
-            extractFields(value[0], `${fieldPath}[0]`);
-          } else {
-            // Handle array of primitives
-            fields.push({
-              field: fieldPath,
-              type: `array of ${value.length > 0 ? typeof value[0] : 'any'}`,
-              required: isRequired
-            });
-          }
-        } else if (typeof value === 'object' && value !== null) {
-          // Handle nested object
-          fields.push({
-            field: fieldPath,
-            type: 'object',
-            required: isRequired
-          });
-          extractFields(value, fieldPath);
-        } else {
-          // Handle primitive values
-          fields.push({
-            field: fieldPath,
-            type: typeof value,
-            required: isRequired
-          });
-        }
-      });
+      // Term life plans
+      "TL001": "Lifetime Secure Plus",
+      "TL002": "Secure Shield Term Plan",
+      "TL003": "Elite Life Protector"
     };
-    
-    extractFields(currentEndpoint.responseExample);
-    return fields;
+
+    // Map in reverse direction: name to ID
+    const nameToIdMap: Record<string, string> = {
+      // Rider names
+      "Enhanced Accidental Coverage": "RID001",
+      "Comprehensive Critical Illness": "RID002",
+      "Premium Waiver Protection": "RID003",
+      
+      // Term life plan names
+      "Lifetime Secure Plus": "TL001",
+      "Secure Shield Term Plan": "TL002",
+      "Elite Life Protector": "TL003"
+    };
+
+    // Check if current endpoint is one of the two that should show both ID and name
+    const showBothColumns = currentEndpoint.title === "Get Rider Quote by ID" || 
+                            currentEndpoint.title === "Get Term Life Plan by Name" ||
+                            currentEndpoint.title === "Get Rider by Name";
+
+    return (
+      <div className="mb-8">
+        <h3 className="text-xl font-semibold mb-4">Example IDs</h3>
+        <Table className="border rounded-md overflow-hidden">
+          <TableHeader className="bg-secondary">
+            <TableRow>
+              <TableHead>ID</TableHead>
+              {showBothColumns && <TableHead>Name</TableHead>}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {pathParam.examples.map((example: string, index: number) => {
+              let id = example;
+              let name = example;
+              
+              // Handle both cases - when the example is an ID or a name
+              if (pathParam.name === "rider_quote_id") {
+                // For rider quotes, example is the ID
+                id = example;
+                name = idToNameMap[example] || example;
+              } else if (pathParam.name === "name" || pathParam.name === "rider_name") {
+                // For term life plans or rider names, example is the name
+                id = nameToIdMap[example] || example;
+                name = example;
+              }
+              
+              return (
+                <TableRow key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
+                  <TableCell>{id}</TableCell>
+                  {showBothColumns && <TableCell>{name}</TableCell>}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    );
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto bg-background text-foreground">
+    <div className="p-6 px-8 max-w-7xl mx-auto bg-background text-foreground">
       {/* API Header Section */}
       <div className="mb-8">
         <div className="flex flex-col mb-2">
@@ -406,6 +402,9 @@ public class ApiRequest {
       <div className="mb-12">
         <h2 className="text-2xl font-bold mb-6">Request</h2>
         
+        {/* Example IDs Table */}
+        {renderExampleIdsTable()}
+        
         {/* Query Parameters */}
         {queryParams && queryParams.length > 0 && (
           <div className="mb-8">
@@ -436,45 +435,6 @@ public class ApiRequest {
                         placeholder={`Example: ${param.description || param.example || ''}`}
                         value={queryParamsValues[param.name] || ''}
                         onChange={(e) => handleQueryParamChange(param.name, e.target.value)}
-                        className="w-full bg-background"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-        
-        {/* Header Parameters */}
-        {headerParams && headerParams.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-xl font-semibold mb-4">Header Params</h3>
-            <Table className="border rounded-md overflow-hidden">
-              <TableHeader className="bg-secondary">
-                <TableRow>
-                  <TableHead className="w-1/4">Parameter</TableHead>
-                  <TableHead className="w-1/4">Type</TableHead>
-                  <TableHead className="w-1/4">Required</TableHead>
-                  <TableHead className="w-1/4">Value</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {headerParams.map((param, index) => (
-                  <TableRow key={index} className={index % 2 === 0 ? 'bg-secondary/30' : ''}>
-                    <TableCell className="text-blue-400">{param.name}</TableCell>
-                    <TableCell>{param.type || 'string'}</TableCell>
-                    <TableCell>
-                      {param.required ? (
-                        <span className="px-2 py-1 bg-orange-500/20 text-orange-500 rounded text-xs">required</span>
-                      ) : (
-                        <span className="text-muted-foreground">optional</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Input 
-                        value={headerParamsValues[param.name] || param.example || ''}
-                        onChange={(e) => handleHeaderParamChange(param.name, e.target.value)}
                         className="w-full bg-background"
                       />
                     </TableCell>
@@ -608,7 +568,7 @@ public class ApiRequest {
           </TabsContent>
           <TabsContent value="examples" className="border rounded-md overflow-hidden">
             <div className="bg-secondary p-4">
-              <h3 className="text-xl font-semibold">Example GET Response</h3>
+              <h3 className="text-xl font-semibold">Example {method} Response</h3>
             </div>
             <div className="p-4 max-h-[600px] overflow-auto bg-black">
               <pre className="text-green-400 whitespace-pre-wrap break-all">

@@ -1,4 +1,3 @@
-
 // API Endpoints data
 export const apiEndpoints = {
   // Applications endpoints
@@ -12,14 +11,8 @@ export const apiEndpoints = {
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "application_id", type: "string", required: true, description: "Unique identifier for the application", example: "AP312666" }
+      { name: "application_id", type: "string", required: true, description: "Unique identifier for the application", examples: ["AP3126", "AP9757", "AP7064"] }
     ],
     responseExample: {
       "application_id": "AP312666",
@@ -82,14 +75,6 @@ export const apiEndpoints = {
     path: "/terminsurance/api/v1/applications/",
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" },
-      { name: "Content-Type", type: "string", required: true, description: "Content type", example: "application/json" },
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
     ],
     bodyParams: [
       { name: "application_id", type: "string", required: true, description: "Unique identifier for the application" },
@@ -176,16 +161,8 @@ export const apiEndpoints = {
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
-    headerParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" },
-      { name: "Content-Type", type: "string", required: true, description: "Content type", example: "application/json" },
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "application_id", type: "string", required: true, description: "Unique identifier for the application", example: "AP312666" }
+      { name: "application_id", type: "string", required: true, description: "Unique identifier for the application", examples: ["AP3126", "AP9757", "AP7064"] }
     ],
     bodyParams: [
       { name: "application_id", type: "string", required: true, description: "Unique identifier for the application" },
@@ -227,14 +204,8 @@ export const apiEndpoints = {
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "quote_id", type: "string", required: true, description: "Unique identifier for the quote", example: "QT2798" }
+      { name: "quote_id", type: "string", required: true, description: "Unique identifier for the quote", examples: ["QT2246", "QT2798", "QT7180"] }
     ],
     responseExample: {
       "quote_id": "QT2798",
@@ -274,14 +245,8 @@ export const apiEndpoints = {
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "policy_id", type: "string", required: true, description: "Unique identifier for the policy", example: "POL12345" }
+      { name: "policy_id", type: "string", required: true, description: "Unique identifier for the policy", examples: ["POL689", "POL245"] }
     ],
     responseExample: {
       "policy_id": "POL12345",
@@ -323,21 +288,15 @@ export const apiEndpoints = {
   "get-rider-by-id": {
     id: "get-rider-by-id",
     category: "Riders",
-    title: "Get Rider by ID",
+    title: "Get Rider by Name",
     method: "GET",
     baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/riders/{rider_id}",
+    path: "/terminsurance/api/v1/riders/{name}",
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "rider_id", type: "string", required: true, description: "Unique identifier for the rider", example: "RID001" }
+      { name: "name", type: "string", required: true, description: "Name of the rider", examples: ["Enhanced Accidental Coverage", "Comprehensive Critical Illness", "Premium Waiver Protection"] }
     ],
     responseExample: {
       "id": "RID001",
@@ -387,14 +346,8 @@ export const apiEndpoints = {
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "rider_application_id", type: "string", required: true, description: "Unique identifier for the rider application", example: "AP50410" }
+      { name: "rider_application_id", type: "string", required: true, description: "Unique identifier for the rider application", examples: ["AP5041", "AP3732", "AP6455"] }
     ],
     responseExample: {
       "rider_application_id": "AP50410",
@@ -421,14 +374,6 @@ export const apiEndpoints = {
     path: "/terminsurance/api/v1/riders_applications/",
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" },
-      { name: "Content-Type", type: "string", required: true, description: "Content type", example: "application/json" },
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
     ],
     bodyParams: [
       { name: "rider_application_id", type: "string", required: true, description: "Unique identifier for the rider application" },
@@ -484,16 +429,8 @@ export const apiEndpoints = {
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
-    headerParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" },
-      { name: "Content-Type", type: "string", required: true, description: "Content type", example: "application/json" },
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "rider_application_id", type: "string", required: true, description: "Unique identifier for the rider application", example: "AP50410" }
+      { name: "rider_application_id", type: "string", required: true, description: "Unique identifier for the rider application", examples: ["AP5041", "AP3732", "AP6455"] }
     ],
     bodyParams: [
       { name: "rider_application_id", type: "string", required: true, description: "Unique identifier for the rider application" },
@@ -527,14 +464,8 @@ export const apiEndpoints = {
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "rider_application_id", type: "string", required: true, description: "Unique identifier for the rider application", example: "AP50410" }
+      { name: "rider_application_id", type: "string", required: true, description: "Unique identifier for the rider application", examples: ["AP5041", "AP3732", "AP6455"] }
     ],
     responseExample: {
       "message": "Rider application deleted successfully",
@@ -543,21 +474,38 @@ export const apiEndpoints = {
   },
 
   // Rider Quotes endpoints
+  "get-rider-quote-by-id": {
+    id: "get-rider-quote-by-id",
+    category: "Rider Quotes",
+    title: "Get Rider Quote by ID",
+    method: "GET",
+    baseUrl: "https://hrms-api.xpectrum-ai.com",
+    path: "/terminsurance/api/v1/riders_quote/{rider_quote_id}",
+    queryParams: [
+      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
+    ],
+    pathParams: [
+      { name: "rider_quote_id", type: "string", required: true, description: "Unique identifier for the rider quote", examples: ["QU7719", "QU2225", "QU2031", "QU1130"] }
+    ],
+    responseExample: {
+      "rider_quote_id": "QU7719",
+      "rider_id": "RID001",
+      "rider_name": "Enhanced Accidental Coverage",
+      "details": [
+        "{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'construction', 'base_policy_premium': 200, 'premium': 27.0, 'waiting_period_in_months': 12, 'geographical_location': 'rural'}"
+      ],
+      "premium": "27.00"
+    }
+  },
   "get-all-rider-quotes": {
     id: "get-all-rider-quotes",
     category: "Rider Quotes",
     title: "Get All Rider Quotes",
     method: "GET",
-    baseUrl: "https://hrms-api.xpectrum-ai.com", 
+    baseUrl: "https://hrms-api.xpectrum-ai.com",
     path: "/terminsurance/api/v1/riders_quote",
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
     ],
     responseExample: [
       {
@@ -570,44 +518,15 @@ export const apiEndpoints = {
         "premium": "27.00"
       },
       {
-        "rider_quote_id": "QU65355",
-        "rider_id": "CI001",
-        "rider_name": "Critical Illness Rider",
+        "rider_quote_id": "QU2225",
+        "rider_id": "RID002",
+        "rider_name": "Comprehensive Critical Illness",
         "details": [
-          "{'age': 55, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'additional_coverage': 100000, 'geographical_location': 'rural', 'premium': 480.0}"
+          "{'age': 35, 'health_condition': 'Excellent', 'smoking_status': 'non-smoker', 'occupation': 'teacher', 'base_policy_premium': 250, 'premium': 35.0, 'waiting_period_in_months': 6, 'geographical_location': 'urban'}"
         ],
-        "premium": "480.00"
+        "premium": "35.00"
       }
     ]
-  },
-  "get-rider-quote-by-id": {
-    id: "get-rider-quote-by-id",
-    category: "Rider Quotes",
-    title: "Get Rider Quote by ID",
-    method: "GET",
-    baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/riders_quote/{rider_name}",
-    queryParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
-    pathParams: [
-      { name: "rider_name", type: "string", required: true, description: "Unique name for the rider", example: "Enhanced Accidental Coverage" }
-    ],
-    responseExample: {
-      "rider_quote_id": "QU7719",
-      "rider_id": "RID001",
-      "rider_name": "Enhanced Accidental Coverage",
-      "details": [
-        "{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'construction', 'base_policy_premium': 200, 'premium': 27.0, 'waiting_period_in_months': 12, 'geographical_location': 'rural'}"
-      ],
-      "premium": "27.00"
-    }
   },
   "create-rider-quote": {
     id: "create-rider-quote",
@@ -618,14 +537,6 @@ export const apiEndpoints = {
     path: "/terminsurance/api/v1/riders_quote/",
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" },
-      { name: "Content-Type", type: "string", required: true, description: "Content type", example: "application/json" },
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
     ],
     bodyParams: [
       { name: "rider_quote_id", type: "string", required: true, description: "Unique identifier for the rider quote" },
@@ -663,16 +574,8 @@ export const apiEndpoints = {
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
-    headerParams: [
-      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" },
-      { name: "Content-Type", type: "string", required: true, description: "Content type", example: "application/json" },
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "rider_quote_id", type: "string", required: true, description: "Unique identifier for the rider quote", example: "QU7719" }
+      { name: "rider_quote_id", type: "string", required: true, description: "Unique identifier for the rider quote", examples: ["QU7719", "QU2225", "QU2031", "QU1130"] }
     ],
     bodyParams: [
       { name: "rider_quote_id", type: "string", required: true, description: "Unique identifier for the rider quote" },
@@ -700,14 +603,8 @@ export const apiEndpoints = {
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "rider_quote_id", type: "string", required: true, description: "Unique identifier for the rider quote", example: "QU7719" }
+      { name: "rider_quote_id", type: "string", required: true, description: "Unique identifier for the rider quote", examples: ["QU7719", "QU2225", "QU2031", "QU1130"] }
     ],
     responseExample: {
       "message": "Rider quote deleted successfully",
@@ -722,15 +619,9 @@ export const apiEndpoints = {
     title: "Get All Term Life Plans",
     method: "GET",
     baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/term_life_insurance_plans",
+    path: "/terminsurance/api/v1/term_life_plans",
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
-    ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
     ],
     responseExample: [
       {
@@ -812,18 +703,12 @@ export const apiEndpoints = {
     title: "Get Term Life Plan by Name",
     method: "GET",
     baseUrl: "https://hrms-api.xpectrum-ai.com",
-    path: "/terminsurance/api/v1/term_life_insurance_plans/{name}",
+    path: "/terminsurance/api/v1/term_life_plans/{name}",
     queryParams: [
       { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
     ],
-    headerParams: [
-      { name: "X-SOURCE", type: "string", required: true, description: "Source identifier", example: "admin" },
-      { name: "X-LANG", type: "string", required: true, description: "Language code", example: "en" },
-      { name: "X-REQUEST-ID", type: "string", required: true, description: "Request identifier", example: "stacktics" },
-      { name: "X-DEVICE-ID", type: "string", required: true, description: "Device identifier", example: "stacktics_device" }
-    ],
     pathParams: [
-      { name: "name", type: "string", required: true, description: "Name of the term life plan", example: "Professional Shield" }
+      { name: "name", type: "string", required: true, description: "Name of the term life plan", examples: ["Lifetime Secure Plus", "Secure Shield Term Plan", "Elite Life Protector"] }
     ],
     responseExample: {
       "id": "TL003",

@@ -380,24 +380,42 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
   };
   
   const renderTabs = () => {
-    const tabs = [
-      { id: "params", label: `Params ${queryParams.filter(p => p.name).length > 0 ? queryParams.filter(p => p.name).length : ''}` },
-      ...(showBody ? [{ id: "body", label: "Body" }] : []),
-      { id: "headers", label: `Headers ${headerParams.filter(p => p.name).length > 0 ? headerParams.filter(p => p.name).length : ''}` },
-      { id: "examples", label: "Examples" },
-    ];
-
     return (
-      <div className="flex border-b">
-        {tabs.map((tab) => (
-          <button 
-            key={tab.id}
-            className={`px-4 py-2 text-sm ${activeTab === tab.id ? 'border-b-2 border-primary text-primary' : 'text-muted-foreground'}`}
-            onClick={() => setActiveTab(tab.id)}
+      <div className="flex border-b px-4">
+        <button
+          onClick={() => setActiveTab('params')}
+          className={`py-2 px-4 text-sm ${activeTab === 'params' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
+        >
+          {activeTab === 'params' ? `Params ${pathParams.filter(p => p.checked && p.name).length + queryParams.filter(p => p.checked && p.name).length}` : 'Params'}
+        </button>
+        {(method === 'POST' || method === 'PUT' || method === 'PATCH') && (
+          <button
+            onClick={() => setActiveTab('body')}
+            className={`py-2 px-4 text-sm ${activeTab === 'body' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
           >
-            {tab.label}
+            Body
           </button>
-        ))}
+        )}
+        <button
+          onClick={() => setActiveTab('headers')}
+          className={`py-2 px-4 text-sm ${activeTab === 'headers' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
+        >
+          {activeTab === 'headers' ? `Headers ${headerParams.filter(p => p.checked && p.name).length}` : 'Headers'}
+        </button>
+        {(currentEndpoint && currentEndpoint.description) && (
+          <button
+            onClick={() => setActiveTab('documentation')}
+            className={`py-2 px-4 text-sm ${activeTab === 'documentation' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
+          >
+            Documentation
+          </button>
+        )}
+        <button
+          onClick={() => setActiveTab('examples')}
+          className={`py-2 px-4 text-sm ${activeTab === 'examples' ? 'border-b-2 border-primary text-primary font-medium' : 'text-muted-foreground'}`}
+        >
+          Examples
+        </button>
       </div>
     );
   };
@@ -1167,7 +1185,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
   
   return (
     <div className="border-l h-screen w-[500px] flex flex-col bg-background">
-      <div className="border-b p-2 flex items-center justify-between bg-background">
+      <div className="border-b p-2 px-4 flex items-center justify-between bg-background">
         <div className="flex items-center space-x-2 px-2">
           <span className={`px-2 py-1 rounded-md text-xs font-medium ${
             method === 'GET' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400' :
@@ -1202,7 +1220,9 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
         <div className="flex-1 overflow-auto">
           {renderTabs()}
           <ScrollArea className="flex-1 h-full">
-            {renderTabContent()}
+            <div className="px-4">
+              {renderTabContent()}
+            </div>
           </ScrollArea>
         </div>
         
@@ -1218,7 +1238,7 @@ export default function ApiUsePanel({ endpoint, method, baseUrl, path, onClose }
           </div>
           
           {!isResponseCollapsed && (
-            <div className="max-h-[700px] overflow-auto">
+            <div className="max-h-[700px] overflow-auto px-4">
               {renderResponse()}
             </div>
           )}
