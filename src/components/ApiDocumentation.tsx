@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "./ui/table";
 import { apiEndpoints } from "../data/apiData";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface ApiDocumentationProps {
   endpoint: string;
@@ -63,120 +64,93 @@ export default function ApiDocumentation({
         const exampleBody: Record<string, any> = {};
         
         // Check endpoint to provide specific examples
-        if (endpoint.includes("applications")) {
-          // Applications example
+        if (currentEndpoint.category === "Applications") {
           return JSON.stringify({
-            "application_id": "AP38211",
-            "applicant_id": "PH5533",
-            "plan_name": "Professional Shield",
-            "plan_id": "TL003",
-            "quote_id": "QU3616",
-            "first_name": "Subhankar",
-            "last_name": "Ghosh",
+            "application_id": "AP312666",
+            "applicant_id": "PH4006",
+            "first_name": "s",
+            "last_name": "g",
             "email_id": "iisubho1@gmail.com",
-            "age": 55,
-            "coverage_amount": 5000000,
-            "quoted_monthly_premium": ["3960"],
-            "term_length": 10,
-            "application_date": "2025-01-21",
-            "application_time": "02:21:53.425121",
+            "application_date": "2025-02-10",
+            "application_time": "01:38:03",
             "status": "approved",
-            "riders": [
-              "{'rider_application_id': 'AP2571', 'rider_applicant_id': 'RH6196', 'rider_name': 'Disability Insurance Rider', 'rider_id': 'DI001', 'rider_quote_id': 'QU3128', 'premium': 158.4, 'frequency': 'monthly', 'application_date': '2025-01-21', 'application_time': '02:21:59.432586', 'status': 'approved', 'quote_details': [{'age': 55, 'occupation': 'others', 'income': 75000, 'benefit_percentage': 60, 'waiting_period': 12, 'health_condition': 'Good', 'geographical_location': 'rural', 'smoking_status': 'non-smoker', 'premium': 158.4, 'frequency': 'monthly'}]}"
-            ],
+            "quote_details": {
+              "age": 40,
+              "plan_id": "TL003",
+              "premium": 1853.28,
+              "quote_id": "QT2798",
+              "frequency": "monthly",
+              "plan_name": "Elite Life Protector",
+              "apply_date": "2025-02-10",
+              "apply_time": "01:20:30",
+              "occupation": "firefighters",
+              "term_length": 20,
+              "tax_benefits": true,
+              "convertibility": true,
+              "smoking_status": "smoker",
+              "coverage_amount": 100000,
+              "health_condition": "good",
+              "medical_exam_required": true,
+              "nominee_types_allowed": [
+                "Spouse",
+                "Children",
+                "Parents",
+                "Siblings",
+                "Business Partner"
+              ]
+            },
             "beneficiary": {
-              "DOB": "11-30-1995",
-              "id_number": "12354",
-              "last_name": "Sar",
-              "first_name": "San",
+              "DOB": "1990-12-12",
+              "id_number": "1289",
+              "last_name": "g",
+              "first_name": "s",
               "relationship": "spouse"
             },
-            "approved_details": [
-              "{'approved_date': '2025-01-21', 'approved_time': '02:23:03', 'approved_by': 'Ramar John'}"
-            ],
-            "quote_details": null,
-            "premium": null,
-            "frequency": null
+            "approved_details": {
+              "approved_by": "Ramar John",
+              "approved_date": "2025-02-12",
+              "approved_time": "01:35:02"
+            },
+            "riders": [
+              "{'rider_application_id': 'AP5041', 'rider_applicant_id': 'RH8521', 'rider_name': 'Enhanced Accidental Coverage', 'rider_id': 'RID001', 'rider_quote_id': 'QU7719', 'premium': 27.0, 'frequency': 'monthly', 'application_date': '2025-02-12', 'application_time': '01:22:20.209534', 'status': 'under review', 'quote_details': [{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'construction', 'base_policy_premium': 200, 'premium': 27.0, 'waiting_period_in_months': 12, 'geographical_location': 'rural'}]}"
+            ]
           }, null, 2);
-        } else if (endpoint.includes("plan_quote")) {
-          // Plan Quote example
+        } else if (currentEndpoint.category === "Rider Applications") {
           return JSON.stringify({
-            "quote_id": "QU361665",
-            "apply_date": "2025-02-10",
-            "apply_time": "14:30:45",
-            "plan_id": "TL003",
-            "plan_name": "Professional Shield",
-            "term_length": 10,
-            "coverage_amount": 5000000,
-            "premium": 3960,
-            "medical_exam_required": 1,
-            "convertibility": 0,
-            "tax_benefits": 1,
-            "nominee_types_allowed": [
-              "Spouse",
-              "Children",
-              "Business Partners"
-            ],
-            "frequency": "monthly",
-            "age": 55,
-            "health_condition": "Good",
-            "occupation": "others",
-            "smoking_status": "non-smoker"
-          }, null, 2);
-        } else if (endpoint.includes("riders_applications")) {
-          // Riders applications example
-          return JSON.stringify({
-            "rider_application_id": "AP38554",
-            "rider_applicant_id": "RH9207",
+            "rider_application_id": "AP50410",
+            "rider_applicant_id": "RH8521",
             "rider_name": "Enhanced Accidental Coverage",
             "rider_id": "RID001",
             "rider_quote_id": "QU7719",
             "premium": "27.00",
             "frequency": "monthly",
             "application_date": "2025-02-12",
-            "application_time": "01:21:47.242427",
+            "application_time": "01:22:20.209534",
             "status": "under review",
             "quote_details": [
-              {
-                "age": 40,
-                "health_condition": "Good",
-                "smoking_status": "non-smoker",
-                "occupation": "construction",
-                "base_policy_premium": 200,
-                "premium": 27.0,
-                "waiting_period_in_months": 12,
-                "geographical_location": "rural"
-              }
+              "{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'construction', 'base_policy_premium': 200, 'premium': 27.0, 'waiting_period_in_months': 12, 'geographical_location': 'rural'}"
             ]
           }, null, 2);
-        } else if (endpoint.includes("riders_quote")) {
-          // Riders quote example
+        } else if (currentEndpoint.category === "Rider Quotes") {
           return JSON.stringify({
-            "rider_quote_id": "QU65355",
-            "rider_id": "CI001",
-            "rider_name": "Critical Illness Rider",
+            "rider_quote_id": "QU7719",
+            "rider_id": "RID001",
+            "rider_name": "Enhanced Accidental Coverage",
             "details": [
-              {
-                "age": 55,
-                "health_condition": "Good",
-                "smoking_status": "non-smoker",
-                "additional_coverage": 100000,
-                "geographical_location": "rural",
-                "premium": 480.0
-              }
+              "{'age': 40, 'health_condition': 'Good', 'smoking_status': 'non-smoker', 'occupation': 'construction', 'base_policy_premium': 200, 'premium': 27.0, 'waiting_period_in_months': 12, 'geographical_location': 'rural'}"
             ],
-            "premium": "480.00"
+            "premium": "27.00"
           }, null, 2);
         } else {
           // For other endpoints or fallback, create from parameters
           currentEndpoint.bodyParams.forEach(param => {
-            if (param.name === "application_id") exampleBody[param.name] = "AP38211";
-            else if (param.name === "applicant_id") exampleBody[param.name] = "PH5533";
-            else if (param.name === "first_name") exampleBody[param.name] = "Subhankar";
-            else if (param.name === "last_name") exampleBody[param.name] = "Ghosh";
+            if (param.name === "application_id") exampleBody[param.name] = "AP312666";
+            else if (param.name === "applicant_id") exampleBody[param.name] = "PH4006";
+            else if (param.name === "first_name") exampleBody[param.name] = "s";
+            else if (param.name === "last_name") exampleBody[param.name] = "g";
             else if (param.name === "email_id") exampleBody[param.name] = "iisubho1@gmail.com";
-            else if (param.name === "age") exampleBody[param.name] = 55;
-            else if (param.name === "coverage_amount") exampleBody[param.name] = 5000000;
+            else if (param.name === "age") exampleBody[param.name] = 40;
+            else if (param.name === "coverage_amount") exampleBody[param.name] = 100000;
             else if (param.type === "string") exampleBody[param.name] = "example_value";
             else if (param.type === "integer" || param.type === "number") exampleBody[param.name] = 0;
             else exampleBody[param.name] = null;
@@ -203,26 +177,27 @@ export default function ApiDocumentation({
 
   // Use the actual response example from the API data
   const responseData = currentEndpoint?.responseExample || (() => {
-    // Generate appropriate response examples based on endpoint
-    if (endpoint.includes("applications")) {
+    // Generate appropriate response examples based on endpoint category
+    if (currentEndpoint?.category === "Applications") {
       return {
-        "application_id": "AP38211",
-        "applicant_id": "PH5533",
-        "first_name": "Subhankar",
-        "last_name": "Ghosh",
+        "application_id": "AP312666",
+        "applicant_id": "PH4006",
+        "first_name": "s",
+        "last_name": "g",
+        "email_id": "iisubho1@gmail.com",
         "status": "approved"
       };
-    } else if (endpoint.includes("plan_quote")) {
+    } else if (currentEndpoint?.category === "Plan Quote") {
       return {
-        "quote_id": "QU361665",
-        "plan_name": "Professional Shield",
-        "premium": 3960,
+        "quote_id": "QT2798",
+        "plan_name": "Elite Life Protector",
+        "premium": 1853.28,
         "frequency": "monthly"
       };
-    } else if (endpoint.includes("riders")) {
+    } else if (currentEndpoint?.category === "Riders") {
       return {
-        "rider_id": "CI001",
-        "rider_name": "Critical Illness Rider"
+        "id": "RID001",
+        "name": "Enhanced Accidental Coverage"
       };
     } else {
       return {
@@ -249,7 +224,8 @@ export default function ApiDocumentation({
 
   const getSampleCode = (language: string) => {
     const apiUrl = `${baseUrl}${path}`;
-    const apiKey = (queryParamsValues.api_key || "xpectrum_api_key_123@ai");
+    const apiKey = encodeURIComponent(queryParamsValues.api_key || "xpectrum_api_key_123@ai");
+    const encodedUrl = apiUrl.replace("{", "%7B").replace("}", "%7D");
 
     switch (language) {
       case "curl":
@@ -327,223 +303,8 @@ public class ApiRequest {
   }
 }`;
 
-      case "swift":
-        return `import Foundation
-
-let url = URL(string: "${apiUrl}")!
-var request = URLRequest(url: url)
-request.httpMethod = "${method}"
-request.addValue("admin", forHTTPHeaderField: "X-SOURCE")
-request.addValue("en", forHTTPHeaderField: "X-LANG")
-request.addValue("stacktics", forHTTPHeaderField: "X-REQUEST-ID")
-request.addValue("stacktics_device", forHTTPHeaderField: "X-DEVICE-ID")
-request.addValue("${apiKey}", forHTTPHeaderField: "x-api-key")
-request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-${method === "POST" || method === "PUT" ? `
-let json = """
-${requestBody}
-"""
-request.httpBody = json.data(using: .utf8)
-` : ""}
-let task = URLSession.shared.dataTask(with: request) { data, response, error in
-  if let data = data {
-    let responseJSON = try? JSONSerialization.jsonObject(with: data)
-    print(responseJSON ?? "No data")
-  }
-}
-task.resume()`;
-
-      case "go":
-        return `package main
-
-import (
-  "fmt"
-  "net/http"
-  "io/ioutil"${method === "POST" || method === "PUT" ? `
-  "strings"` : ""}
-)
-
-func main() {
-  ${method === "POST" || method === "PUT" ? `jsonStr := \`${requestBody}\`
-  payload := strings.NewReader(jsonStr)
-  req, _ := http.NewRequest("${method}", "${apiUrl}", payload)` : `req, _ := http.NewRequest("${method}", "${apiUrl}", nil)`}
-  
-  req.Header.Add("X-SOURCE", "admin")
-  req.Header.Add("X-LANG", "en")
-  req.Header.Add("X-REQUEST-ID", "stacktics")
-  req.Header.Add("X-DEVICE-ID", "stacktics_device")
-  req.Header.Add("x-api-key", "${apiKey}")
-  req.Header.Add("Content-Type", "application/json")
-  
-  res, _ := http.DefaultClient.Do(req)
-  defer res.Body.Close()
-  body, _ := ioutil.ReadAll(res.Body)
-  
-  fmt.Println(string(body))
-}`;
-
-      case "php":
-        return `<?php
-$curl = curl_init();
-
-curl_setopt_array($curl, [
-  CURLOPT_URL => "${apiUrl}",
-  CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_CUSTOMREQUEST => "${method}",
-  CURLOPT_HTTPHEADER => [
-    "X-SOURCE: admin",
-    "X-LANG: en",
-    "X-REQUEST-ID": "stacktics",
-    "X-DEVICE-ID": "stacktics_device",
-    "x-api-key": "${apiKey}",
-    "Content-Type: application/json"
-  ]${method === "POST" || method === "PUT" ? `,
-  CURLOPT_POSTFIELDS => '${requestBody}'` : ""}
-]);
-
-$response = curl_exec($curl);
-curl_close($curl);
-
-echo $response;
-?>`;
-
-      case "c#":
-        return `using System;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-
-class Program
-{
-  static async Task Main()
-  {
-    using (var client = new HttpClient())
-    {
-      client.DefaultRequestHeaders.Add("X-SOURCE", "admin");
-      client.DefaultRequestHeaders.Add("X-LANG", "en");
-      client.DefaultRequestHeaders.Add("X-REQUEST-ID", "stacktics");
-      client.DefaultRequestHeaders.Add("X-DEVICE-ID", "stacktics_device");
-      client.DefaultRequestHeaders.Add("x-api-key", "${apiKey}");
-      
-      ${method === "POST" || method === "PUT" ? `var content = new StringContent(
-        @"${requestBody}",
-        Encoding.UTF8,
-        "application/json"
-      );
-      
-      var response = await client.${method === "POST" ? "PostAsync" : "PutAsync"}("${apiUrl}", content);` : `var request = new HttpRequestMessage(
-        new HttpMethod("${method}"),
-        "${apiUrl}"
-      );
-      
-      var response = await client.SendAsync(request);`}
-      
-      var responseContent = await response.Content.ReadAsStringAsync();
-      Console.WriteLine(responseContent);
-    }
-  }
-}`;
-
-      case "objc":
-        return `#import <Foundation/Foundation.h>
-
-NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"${apiUrl}"]];
-[request setHTTPMethod:@"${method}"];
-
-[request setValue:@"admin" forHTTPHeaderField:@"X-SOURCE"];
-[request setValue:@"en" forHTTPHeaderField:@"X-LANG"];
-[request setValue:@"stacktics" forHTTPHeaderField:@"X-REQUEST-ID"];
-[request setValue:@"stacktics_device" forHTTPHeaderField:@"X-DEVICE-ID"];
-[request setValue:@"${apiKey}" forHTTPHeaderField:@"x-api-key"];
-[request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-${method === "POST" || method === "PUT" ? `
-NSString *jsonBody = @"${requestBody.replace(/"/g, '\\"')}";
-[request setHTTPBody:[jsonBody dataUsingEncoding:NSUTF8StringEncoding]];
-` : ""}
-NSURLSession *session = [NSURLSession sharedSession];
-NSURLSessionDataTask *task = [session dataTaskWithRequest:request
-                                        completionHandler:
-                                      ^(NSData *data, NSURLResponse *response, NSError *error) {
-  if (data) {
-    NSError *parseError = nil;
-    id responseObject = [NSJSONSerialization JSONObjectWithData:data options:0 error:&parseError];
-    NSLog(@"%@", responseObject);
-  }
-}];
-[task resume];`;
-
-      case "ruby":
-        return `require 'uri'
-require 'net/http'
-require 'json'
-
-uri = URI('${apiUrl}')
-http = Net::HTTP.new(uri.host, uri.port)
-http.use_ssl = true
-
-request = Net::HTTP::${method.charAt(0).toUpperCase() + method.slice(1).toLowerCase()}.new(uri.path)
-request['X-SOURCE'] = 'admin'
-request['X-LANG'] = 'en'
-request['X-REQUEST-ID'] = 'stacktics'
-request['X-DEVICE-ID'] = 'stacktics_device'
-request['x-api-key'] = '${apiKey}'
-request['Content-Type'] = 'application/json'
-${method === "POST" || method === "PUT" ? `request.body = '${requestBody}'` : ""}
-
-response = http.request(request)
-puts response.read_body`;
-
-      case "c":
-        return `#include <stdio.h>
-#include <curl/curl.h>
-
-int main(void)
-{
-  CURL *curl;
-  CURLcode res;
-  
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, "${apiUrl}");
-    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "${method}");
-    
-    struct curl_slist *headers = NULL;
-    headers = curl_slist_append(headers, "X-SOURCE: admin");
-    headers = curl_slist_append(headers, "X-LANG: en");
-    headers = curl_slist_append(headers, "X-REQUEST-ID: stacktics");
-    headers = curl_slist_append(headers, "X-DEVICE-ID: stacktics_device");
-    headers = curl_slist_append(headers, "x-api-key: ${apiKey}");
-    headers = curl_slist_append(headers, "Content-Type: application/json");
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-    
-    ${method === "POST" || method === "PUT" ? `curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "${requestBody.replace(/"/g, '\\"')}");` : ""}
-    
-    res = curl_easy_perform(curl);
-    if(res != CURLE_OK) {
-      fprintf(stderr, "curl_easy_perform() failed: %s\\n", curl_easy_strerror(res));
-    }
-    
-    curl_slist_free_all(headers);
-    curl_easy_cleanup(curl);
-  }
-  
-  return 0;
-}`;
-
-      case "http":
-        return `${method} ${apiUrl} HTTP/1.1
-X-SOURCE: admin
-X-LANG: en
-X-REQUEST-ID: stacktics
-X-DEVICE-ID: stacktics_device
-x-api-key: ${apiKey}
-Content-Type: application/json
-${method === "POST" || method === "PUT" ? `
-
-${requestBody}` : ""}`;
-
       default:
-        return "Select a language to see code examples";
+        return `// Select a language to see code examples for: ${apiUrl}`;
     }
   };
 
@@ -732,7 +493,7 @@ ${requestBody}` : ""}`;
               <Textarea
                 className="w-full min-h-[200px] p-4 font-mono text-sm bg-secondary/10"
                 value={requestBody}
-                readOnly
+                onChange={(e) => setRequestBody(e.target.value)}
               />
             </div>
           </div>
@@ -769,62 +530,6 @@ ${requestBody}` : ""}`;
             >
               <span className="bg-gray-700 text-orange-400 px-1">J</span>
               <span>Java</span>
-            </button>
-            <button 
-              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'swift' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
-              onClick={() => setActiveLanguage('swift')}
-            >
-              <span className="bg-gray-700 text-red-400 px-1">S</span>
-              <span>Swift</span>
-            </button>
-            <button 
-              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'go' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
-              onClick={() => setActiveLanguage('go')}
-            >
-              <span className="bg-gray-700 text-blue-400 px-1">Go</span>
-              <span>Go</span>
-            </button>
-            <button 
-              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'php' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
-              onClick={() => setActiveLanguage('php')}
-            >
-              <span className="bg-gray-700 text-purple-400 px-1">P</span>
-              <span>PHP</span>
-            </button>
-            <button 
-              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'http' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
-              onClick={() => setActiveLanguage('http')}
-            >
-              <span className="bg-gray-700 text-gray-400 px-1">{}</span>
-              <span>HTTP</span>
-            </button>
-            <button 
-              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'c' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
-              onClick={() => setActiveLanguage('c')}
-            >
-              <span className="bg-gray-700 text-gray-400 px-1">C</span>
-              <span>C</span>
-            </button>
-            <button 
-              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'c#' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
-              onClick={() => setActiveLanguage('c#')}
-            >
-              <span className="bg-gray-700 text-green-400 px-1">C#</span>
-              <span>C#</span>
-            </button>
-            <button 
-              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'objc' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
-              onClick={() => setActiveLanguage('objc')}
-            >
-              <span className="bg-gray-700 text-gray-400 px-1">[C]</span>
-              <span>Objective-C</span>
-            </button>
-            <button 
-              className={`px-4 py-1 rounded text-xs flex items-center gap-1 ${activeLanguage === 'ruby' ? 'bg-primary/20 border border-primary/50' : 'bg-secondary/50'}`}
-              onClick={() => setActiveLanguage('ruby')}
-            >
-              <span className="bg-gray-700 text-red-400 px-1">R</span>
-              <span>Ruby</span>
             </button>
           </div>
           <div className="border rounded-md overflow-hidden">
@@ -865,37 +570,53 @@ ${requestBody}` : ""}`;
       {/* Responses Section */}
       <div className="mb-8">
         <h2 className="text-2xl font-bold mb-6">Response</h2>
-        <div className="border rounded-md overflow-hidden">
-          <div className="bg-secondary p-4 flex justify-between items-center">
-            <h3 className="text-xl font-semibold">Response Body</h3>
-            <div className="flex space-x-2">
-              <Button 
-                variant={responseFormat === 'json' ? 'default' : 'outline'} 
-                size="sm" 
-                onClick={() => setResponseFormat('json')}
-              >
-                JSON
-              </Button>
-              <Button 
-                variant={responseFormat === 'text' ? 'default' : 'outline'} 
-                size="sm" 
-                onClick={() => setResponseFormat('text')}
-              >
-                Text
-              </Button>
+        <Tabs defaultValue="body" className="w-full">
+          <TabsList>
+            <TabsTrigger value="body">Response Body</TabsTrigger>
+            <TabsTrigger value="examples">Examples</TabsTrigger>
+          </TabsList>
+          <TabsContent value="body" className="border rounded-md overflow-hidden">
+            <div className="bg-secondary p-4 flex justify-between items-center">
+              <h3 className="text-xl font-semibold">Response Body</h3>
+              <div className="flex space-x-2">
+                <Button 
+                  variant={responseFormat === 'json' ? 'default' : 'outline'} 
+                  size="sm" 
+                  onClick={() => setResponseFormat('json')}
+                >
+                  JSON
+                </Button>
+                <Button 
+                  variant={responseFormat === 'text' ? 'default' : 'outline'} 
+                  size="sm" 
+                  onClick={() => setResponseFormat('text')}
+                >
+                  Text
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="p-4 max-h-[600px] overflow-auto bg-black">
-            <pre className="text-green-400 whitespace-pre-wrap break-all">
-              {responseFormat === 'json' 
-                ? JSON.stringify(responseData, null, 2) 
-                : typeof responseData === 'object' 
-                  ? JSON.stringify(responseData) 
-                  : String(responseData)
-              }
-            </pre>
-          </div>
-        </div>
+            <div className="p-4 max-h-[600px] overflow-auto bg-black">
+              <pre className="text-green-400 whitespace-pre-wrap break-all">
+                {responseFormat === 'json' 
+                  ? JSON.stringify(responseData, null, 2) 
+                  : typeof responseData === 'object' 
+                    ? JSON.stringify(responseData) 
+                    : String(responseData)
+                }
+              </pre>
+            </div>
+          </TabsContent>
+          <TabsContent value="examples" className="border rounded-md overflow-hidden">
+            <div className="bg-secondary p-4">
+              <h3 className="text-xl font-semibold">Example GET Response</h3>
+            </div>
+            <div className="p-4 max-h-[600px] overflow-auto bg-black">
+              <pre className="text-green-400 whitespace-pre-wrap break-all">
+                {JSON.stringify(currentEndpoint?.responseExample || {}, null, 2)}
+              </pre>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

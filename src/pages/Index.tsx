@@ -47,6 +47,7 @@ const Index = () => {
           baseUrl={currentEndpoint.baseUrl}
           path={currentEndpoint.path}
           onClose={() => setShowApiUsePanel(false)}
+          requestBodyExample={currentEndpoint.requestBodyExample || null}
         />
       )}
     </div>

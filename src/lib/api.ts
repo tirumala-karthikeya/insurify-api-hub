@@ -80,6 +80,10 @@ export const ridersApplicationsApi = {
 
 // API helper functions for Rider Quotes
 export const ridersQuoteApi = {
+  getAll: async () => {
+    const response = await api.get(`/terminsurance/api/v1/riders_quote?api_key=${API_KEY}`);
+    return response.data;
+  },
   getById: async (id: string) => {
     const response = await api.get(`/terminsurance/api/v1/riders_quote/${id}?api_key=${API_KEY}`);
     return response.data;
@@ -99,7 +103,11 @@ export const ridersQuoteApi = {
 };
 
 // API helper functions for Term Life Insurance Plans
-export const termLifeInsurancePlansApi = {
+export const termLifePlansApi = {
+  getAll: async () => {
+    const response = await api.get(`/terminsurance/api/v1/term_life_insurance_plans?api_key=${API_KEY}`);
+    return response.data;
+  },
   getById: async (id: string) => {
     const response = await api.get(`/terminsurance/api/v1/term_life_insurance_plans/${id}?api_key=${API_KEY}`);
     return response.data;
@@ -113,5 +121,5 @@ export default {
   ridersApi,
   ridersApplicationsApi,
   ridersQuoteApi,
-  termLifeInsurancePlansApi
+  termLifePlansApi
 }; 
