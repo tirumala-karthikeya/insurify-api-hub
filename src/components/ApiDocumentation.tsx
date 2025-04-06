@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { ChevronDown, ChevronUp, Copy, Check } from "lucide-react";
 import { Input } from "./ui/input";
@@ -97,56 +98,32 @@ export default function ApiDocumentation({
             "premium": null,
             "frequency": null
           }, null, 2);
-        } else if (endpoint.includes("quotes")) {
-          // Quotes example
+        } else if (endpoint.includes("plan_quote")) {
+          // Plan Quote example
           return JSON.stringify({
             "quote_id": "QU361665",
-            "plan_name": "Professional Shield",
+            "apply_date": "2025-02-10",
+            "apply_time": "14:30:45",
             "plan_id": "TL003",
+            "plan_name": "Professional Shield",
+            "term_length": 10,
+            "coverage_amount": 5000000,
+            "premium": 3960,
+            "medical_exam_required": 1,
+            "convertibility": 0,
+            "tax_benefits": 1,
+            "nominee_types_allowed": [
+              "Spouse",
+              "Children",
+              "Business Partners"
+            ],
+            "frequency": "monthly",
             "age": 55,
             "health_condition": "Good",
-            "smoking_status": "non-smoker",
             "occupation": "others",
-            "coverage_amount": 5000000,
-            "term_length": 10,
-            "monthly_premium": ["3960"],
-            "plan": {
-              "id": "TL003",
-              "name": "Professional Shield",
-              "features": {
-                "policy_type": "Professional Term",
-                "grace_period": 60,
-                "tax_benefits": true,
-                "payment_methods": [
-                  "Bank Transfer",
-                  "Online Payment",
-                  "Corporate Payroll Deduction"
-                ],
-                "digital_services": {
-                  "claim_intimation": true,
-                  "policy_management": true,
-                  "professional_risk_assessment": true
-                },
-                "nomination_process": [
-                  "Online",
-                  "Branch",
-                  "Corporate Liaison"
-                ]
-              },
-              "age_range": {
-                "maximum_entry_age": 55,
-                "minimum_entry_age": 25,
-                "maximum_maturity_age": 70
-              },
-              "description": "A specialized term life insurance plan tailored for high-earning professionals",
-              "available_riders": [
-                "Disability Insurance Rider",
-                "Critical Illness Rider"
-              ]
-            }
+            "smoking_status": "non-smoker"
           }, null, 2);
-        } 
-        else if (endpoint.includes("riders_applications")) {
+        } else if (endpoint.includes("riders_applications")) {
           // Riders applications example
           return JSON.stringify({
             "rider_application_id": "AP38554",
@@ -235,11 +212,12 @@ export default function ApiDocumentation({
         "last_name": "Ghosh",
         "status": "approved"
       };
-    } else if (endpoint.includes("quotes")) {
+    } else if (endpoint.includes("plan_quote")) {
       return {
         "quote_id": "QU361665",
         "plan_name": "Professional Shield",
-        "monthly_premium": ["3960"]
+        "premium": 3960,
+        "frequency": "monthly"
       };
     } else if (endpoint.includes("riders")) {
       return {
@@ -418,7 +396,7 @@ curl_setopt_array($curl, [
     "X-REQUEST-ID": "stacktics",
     "X-DEVICE-ID": "stacktics_device",
     "x-api-key": "${apiKey}",
-    "Content-Type": "application/json"
+    "Content-Type: application/json"
   ]${method === "POST" || method === "PUT" ? `,
   CURLOPT_POSTFIELDS => '${requestBody}'` : ""}
 ]);
@@ -534,8 +512,8 @@ int main(void)
     headers = curl_slist_append(headers, "X-LANG: en");
     headers = curl_slist_append(headers, "X-REQUEST-ID: stacktics");
     headers = curl_slist_append(headers, "X-DEVICE-ID: stacktics_device");
-    headers = curl_slist_append(headers, "x-api-key": "${apiKey}");
-    headers = curl_slist_append(headers, "Content-Type": "application/json");
+    headers = curl_slist_append(headers, "x-api-key: ${apiKey}");
+    headers = curl_slist_append(headers, "Content-Type: application/json");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     
     ${method === "POST" || method === "PUT" ? `curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "${requestBody.replace(/"/g, '\\"')}");` : ""}
