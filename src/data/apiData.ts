@@ -233,6 +233,69 @@ export const apiEndpoints = {
       "smoking_status": "smoker"
     }
   },
+  "create-plan-quote": {
+    id: "create-plan-quote",
+    category: "Plan Quote",
+    title: "Create Plan Quote",
+    method: "POST",
+    baseUrl: "https://hrms-api.xpectrum-ai.com",
+    path: "/terminsurance/api/v1/plan_quote/",
+    queryParams: [
+      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
+    ],
+    bodyParams: [
+      { name: "quote_id", type: "string", required: true, description: "Unique identifier for the quote" },
+      { name: "apply_date", type: "string", required: false, description: "Date of application" },
+      { name: "apply_time", type: "string", required: false, description: "Time of application" },
+      { name: "plan_id", type: "string", required: false, description: "Unique identifier for the plan" },
+      { name: "plan_name", type: "string", required: false, description: "Name of the plan" },
+      { name: "term_length", type: "integer", required: false, description: "Term length in years" },
+      { name: "coverage_amount", type: "integer", required: false, description: "Coverage amount" },
+      { name: "premium", type: "number", required: false, description: "Premium amount" },
+      { name: "medical_exam_required", type: "integer", required: false, description: "Whether medical exam is required (1/0)" },
+      { name: "convertibility", type: "integer", required: false, description: "Whether the plan is convertible (1/0)" },
+      { name: "tax_benefits", type: "integer", required: false, description: "Whether tax benefits are available (1/0)" },
+      { name: "nominee_types_allowed", type: "array", required: false, description: "Types of nominees allowed" },
+      { name: "frequency", type: "string", required: false, description: "Premium payment frequency" },
+      { name: "age", type: "integer", required: false, description: "Age of the applicant" },
+      { name: "health_condition", type: "string", required: false, description: "Health condition of the applicant" },
+      { name: "occupation", type: "string", required: false, description: "Occupation of the applicant" },
+      { name: "smoking_status", type: "string", required: false, description: "Smoking status of the applicant" }
+    ],
+    requestBodyExample: {
+      "quote_id": "QT2798",
+      "apply_date": "2025-02-10",
+      "apply_time": "01:20:30",
+      "plan_id": "TL003",
+      "plan_name": "Elite Life Protector",
+      "term_length": 20,
+      "coverage_amount": 100000,
+      "premium": 1853.28,
+      "medical_exam_required": 1,
+      "convertibility": 1,
+      "tax_benefits": 1,
+      "nominee_types_allowed": [
+        "Spouse",
+        "Children",
+        "Parents",
+        "Siblings",
+        "Business Partner"
+      ],
+      "frequency": "monthly",
+      "age": 40,
+      "health_condition": "good",
+      "occupation": "firefighters",
+      "smoking_status": "smoker"
+    },
+    responseExample: {
+      "quote_id": "QT2798",
+      "apply_date": "2025-02-10",
+      "apply_time": "01:20:30",
+      "plan_id": "TL003",
+      "plan_name": "Elite Life Protector",
+      "premium": 1853.28
+    }
+  },
 
   // Policies endpoints
   "get-policy-by-id": {
@@ -281,6 +344,103 @@ export const apiEndpoints = {
           "relationship": "spouse"
         }
       ]
+    }
+  },
+  "create-policy": {
+    id: "create-policy",
+    category: "Policies",
+    title: "Create Policy",
+    method: "POST",
+    baseUrl: "https://hrms-api.xpectrum-ai.com",
+    path: "/terminsurance/api/v1/policies/",
+    queryParams: [
+      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
+    ],
+    bodyParams: [
+      { name: "policy_id", type: "string", required: true, description: "Unique identifier for the policy" },
+      { name: "policy_holder_id", type: "string", required: false, description: "Unique identifier for the policy holder" },
+      { name: "application_id", type: "string", required: false, description: "Unique identifier for the application" },
+      { name: "policy_status", type: "string", required: false, description: "Status of the policy" },
+      { name: "next_payment_date", type: "string", required: false, description: "Next payment date" },
+      { name: "first_name", type: "string", required: false, description: "First name of the policy holder" },
+      { name: "last_name", type: "string", required: false, description: "Last name of the policy holder" },
+      { name: "plan_details", type: "object", required: false, description: "Plan details" },
+      { name: "policy_dates", type: "object", required: false, description: "Policy dates" },
+      { name: "policy_creation", type: "object", required: false, description: "Policy creation details" },
+      { name: "riders", type: "array", required: false, description: "Riders for the policy" },
+      { name: "beneficiary", type: "array", required: false, description: "Beneficiaries of the policy" }
+    ],
+    requestBodyExample: {
+      "policy_id": "POL68998",
+      "policy_holder_id": "PH4006",
+      "application_id": "AP3126",
+      "policy_status": "Cancelled",
+      "next_payment_date": "2025-02-20",
+      "first_name": "s",
+      "last_name": "g",
+      "plan_details": {
+        "premium": 1853.28,
+        "base_plan": "TL003",
+        "frequency": "monthly",
+        "plan_name": "Elite Life Protector",
+        "term_length": 20,
+        "coverage_amount": 100000
+      },
+      "policy_dates": {
+        "end_date": "2045-02-05",
+        "start_date": "2025-02-10"
+      },
+      "policy_creation": {
+        "creation_date": "2025-02-10",
+        "creation_time": "02:41:21"
+      },
+      "riders": [],
+      "beneficiary": [
+        "{'first_name': 's', 'last_name': 'g', 'id_number': '1289', 'DOB': '1990-12-12', 'relationship': 'spouse', 'coverage_share': 40}",
+        "{'beneficiary_first_name': 'Su', 'beneficiary_last_name': 'Gh', 'relationship': 'mother', 'coverage_share': 20}",
+        "{'beneficiary_first_name': 'gh', 'beneficiary_last_name': 'sg', 'relationship': 'mother', 'coverage_share': 20}"
+      ]
+    },
+    responseExample: {
+      "policy_id": "POL68998",
+      "policy_status": "Cancelled",
+      "policy_holder_id": "PH4006"
+    }
+  },
+  "update-policy": {
+    id: "update-policy",
+    category: "Policies",
+    title: "Update Policy",
+    method: "PUT",
+    baseUrl: "https://hrms-api.xpectrum-ai.com",
+    path: "/terminsurance/api/v1/policies/{policy_id}",
+    queryParams: [
+      { name: "api_key", type: "string", required: true, description: "API Key for authentication", example: "xpectrum_api_key_123@ai" }
+    ],
+    pathParams: [
+      { name: "policy_id", type: "string", required: true, description: "Unique identifier for the policy", examples: ["POL689", "POL245"] }
+    ],
+    bodyParams: [
+      { name: "policy_id", type: "string", required: true, description: "Unique identifier for the policy" },
+      { name: "policy_holder_id", type: "string", required: false, description: "Unique identifier for the policy holder" },
+      { name: "application_id", type: "string", required: false, description: "Unique identifier for the application" },
+      { name: "policy_status", type: "string", required: false, description: "Status of the policy" },
+      { name: "next_payment_date", type: "string", required: false, description: "Next payment date" },
+      { name: "first_name", type: "string", required: false, description: "First name of the policy holder" },
+      { name: "last_name", type: "string", required: false, description: "Last name of the policy holder" },
+      { name: "plan_details", type: "object", required: false, description: "Plan details" },
+      { name: "policy_dates", type: "object", required: false, description: "Policy dates" },
+      { name: "policy_creation", type: "object", required: false, description: "Policy creation details" },
+      { name: "riders", type: "array", required: false, description: "Riders for the policy" },
+      { name: "beneficiary", type: "array", required: false, description: "Beneficiaries of the policy" }
+    ],
+    requestBodyExample: {
+      "policy_id": "POL68998",
+      "policy_status": "Active"
+    },
+    responseExample: {
+      "policy_id": "POL68998",
+      "policy_status": "Active"
     }
   },
 

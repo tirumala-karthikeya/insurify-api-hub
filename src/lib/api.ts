@@ -38,6 +38,10 @@ export const planQuoteApi = {
   getById: async (id: string) => {
     const response = await api.get(`/terminsurance/api/v1/plan_quote/${id}?api_key=${API_KEY}`);
     return response.data;
+  },
+  create: async (data: any) => {
+    const response = await api.post(`/terminsurance/api/v1/plan_quote/?api_key=${API_KEY}`, data);
+    return response.data;
   }
 };
 
@@ -45,6 +49,14 @@ export const planQuoteApi = {
 export const policiesApi = {
   getById: async (id: string) => {
     const response = await api.get(`/terminsurance/api/v1/policies/${id}?api_key=${API_KEY}`);
+    return response.data;
+  },
+  create: async (data: any) => {
+    const response = await api.post(`/terminsurance/api/v1/policies/?api_key=${API_KEY}`, data);
+    return response.data;
+  },
+  update: async (id: string, data: any) => {
+    const response = await api.put(`/terminsurance/api/v1/policies/${id}?api_key=${API_KEY}`, data);
     return response.data;
   }
 };
